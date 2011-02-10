@@ -218,7 +218,7 @@ a, b, c, d
 e f g
 data:
 ...
-}}
+}}}
 
 Alternately, the labels may be embedded within the data, requiring a `labels embedded` command:
 {{{
