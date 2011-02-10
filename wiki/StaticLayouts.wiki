@@ -1,0 +1,8 @@
+#summary Documentation for the static graph layouts in GraphExplorer.
+
+= Introduction =
+Regular vs. Iterative layouts
+
+=Fixed Layouts=
+
+=Iterative Layouts=
