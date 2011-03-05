@@ -5,13 +5,6 @@
 
 package graphexplorer.controller;
 
-import graphics.renderer.AbstractPointRenderer;
-import graphics.renderer.BasicPointRenderer;
-import graphics.renderer.BasicShapeRenderer;
-import graphics.renderer.BasicStrokeRenderer;
-import graphics.renderer.PointRenderer;
-import graphics.renderer.ShapeLibrary;
-import graphics.renderer.ShapeRenderer;
 import java.awt.Color;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -21,6 +14,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.bm.blaise.graphics.renderer.AbstractPointRenderer;
+import org.bm.blaise.graphics.renderer.BasicPointRenderer;
+import org.bm.blaise.graphics.renderer.BasicShapeRenderer;
+import org.bm.blaise.graphics.renderer.BasicStrokeRenderer;
+import org.bm.blaise.graphics.renderer.PointRenderer;
+import org.bm.blaise.graphics.renderer.ShapeLibrary;
+import org.bm.blaise.graphics.renderer.ShapeRenderer;
 import org.bm.blaise.scio.graph.ValuedGraph;
 import org.bm.blaise.scio.graph.WeightedGraph;
 import utils.MapGetter;

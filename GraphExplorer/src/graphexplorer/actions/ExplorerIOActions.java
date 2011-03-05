@@ -39,8 +39,8 @@ import org.bm.blaise.scio.graph.ValuedGraph;
 import org.bm.blaise.scio.graph.io.*;
 import org.bm.blaise.scio.graph.io.AbstractGraphIO.GraphType;
 import org.bm.blaise.scio.graph.time.TimeGraph;
+import org.bm.blaise.specto.PlotComponent;
 import util.io.FileNameExtensionFilter;
-import visometry.PlotComponent;
 
 /**
  * Describes file/IO actions supporting the graph explorer app.

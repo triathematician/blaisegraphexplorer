@@ -5,7 +5,9 @@
 
 package graphexplorer.views;
 
+import edu.jhuapl.simplechart.AxisDisplayManager;
 import edu.jhuapl.simplechart.SimpleChart;
+import edu.jhuapl.simplechart.convert.CSlot;
 import edu.jhuapl.simplechart.data.MultiSeriesModel;
 import edu.jhuapl.simplechart.viz.AbstractViz;
 import edu.jhuapl.simplechart.viz.AreaViz;
@@ -73,7 +75,8 @@ public class GraphStatPlot extends javax.swing.JPanel
         long t0 = System.currentTimeMillis();
         List values = gsc.getValues();
         if (values == null || gsc.getMetric() == null) {
-            chart.setViz(null);
+            if (chart != null)
+                chart.setViz(null);
         } else {
             String metricString = gsc.getMetric().toString();
             chart.setTitle(metricString + " Distribution");
@@ -91,8 +94,7 @@ public class GraphStatPlot extends javax.swing.JPanel
                 }
                 XYViz viz = new XYViz(MultiSeriesModel.getInstance(data));
                 chart.setVLabel("(irrelevant)");
-            // TODO - fix chart
-//                chart.setVAxisVisible(false);
+                chart.setVAxisVisible(false);
                 chart.setViz(viz);
             } else {
                 // use line chart
@@ -109,14 +111,12 @@ public class GraphStatPlot extends javax.swing.JPanel
                 AbstractViz viz = model.getMax() > 25 ? new AreaViz(dataModel)
                     : new BarViz(dataModel);
                 chart.setVLabel("Number of Nodes");
-            // TODO - fix chart
-//                chart.setVAxisVisible(true);
+                chart.setVAxisVisible(true);
                 chart.setViz(viz);
                 String[] labels = new String[data[0].length];
                 for (int i = 0; i < labels.length; i++)
                     labels[i] = "" + i;
-            // TODO - fix chart
-//                chart.setHAxisDisplayManager(new AxisDisplayManager.CSlotManager((CSlot) viz.getHGeometry(), labels));
+                chart.setHAxisDisplayManager(new AxisDisplayManager.CSlotManager((CSlot) viz.getHGeometry(), labels));
             }
         }
         long t1 = System.currentTimeMillis();

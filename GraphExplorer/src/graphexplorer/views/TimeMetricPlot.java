@@ -101,8 +101,7 @@ public class TimeMetricPlot extends javax.swing.JPanel
             }
 
             MultiSeriesModel<Double[]> m = MultiSeriesModel.getInstance(dataArr);
-            // TODO - fix chart
-//            chart.setViz(new XYViz(m, false));
+            chart.setViz(new XYViz(m, false));
             chart.setVLabel("Value of Metric " + metric);
             chart.setTitle("Distribution of " + metric + " over time");
         }

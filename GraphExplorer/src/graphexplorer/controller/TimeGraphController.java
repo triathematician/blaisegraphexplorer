@@ -8,7 +8,6 @@ package graphexplorer.controller;
 import java.awt.geom.Point2D;
 import java.beans.PropertyChangeEvent;
 import java.util.Map;
-import org.bm.blaise.scio.graph.Graph;
 import org.bm.blaise.scio.graph.time.TimeGraph;
 import org.bm.blaise.specto.plane.graph.GraphManager;
 import org.bm.blaise.specto.plane.graph.time.TimeGraphComponent;

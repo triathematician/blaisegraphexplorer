@@ -21,6 +21,7 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.image.PixelGrabber;
 import java.io.File;
+import org.bm.blaise.specto.PlotComponent;
 
 
 import quicktime.QTException;
@@ -42,7 +43,6 @@ import quicktime.std.movies.Track;
 import quicktime.std.movies.media.VideoMedia;
 import quicktime.util.QTHandle;
 import quicktime.util.RawEncodedImage;
-import visometry.PlotComponent;
 
 /**
  * Exports animation as a QuickTime movie, using the QTJava library. Much of the

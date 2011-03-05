@@ -5,13 +5,13 @@
 
 package graphexplorer.controller;
 
-import graphics.renderer.PointRenderer;
 import java.awt.geom.Point2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.bm.blaise.graphics.renderer.PointRenderer;
 import org.bm.blaise.scio.graph.Graph;
 import org.bm.blaise.scio.graph.layout.IterativeGraphLayout;
 import org.bm.blaise.scio.graph.layout.StaticGraphLayout;
