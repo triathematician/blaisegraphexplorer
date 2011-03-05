@@ -21,7 +21,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
-import visometry.plane.PlanePlotComponent;
+import org.bm.blaise.specto.plane.PlanePlotComponent;
 
 /**
  * Describes actions supporting the graph explorer app.
