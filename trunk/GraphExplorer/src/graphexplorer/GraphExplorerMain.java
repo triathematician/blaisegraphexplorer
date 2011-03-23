@@ -5,7 +5,6 @@
 
 package graphexplorer;
 
-import org.bm.blaise.specto.plane.graph.time.TimeGraphComponent;
 import data.propertysheet.BeanEditorSupport;
 import graphexplorer.controller.GraphControllerMaster;
 import graphexplorer.controller.GraphController;
@@ -45,6 +44,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import org.bm.blaise.scio.graph.layout.IterativeGraphLayout;
 import org.bm.blaise.specto.plane.graph.*;
+import org.bm.blaise.specto.plane.graph.time.TimeGraphComponent;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.ApplicationActionMap;
@@ -862,6 +862,8 @@ public class GraphExplorerMain extends javax.swing.JFrame
                 nodePS.removeBeanChangeListener(this);
             if (edgePS != null)
                 edgePS.removeBeanChangeListener(this);
+            if (labelPS != null)
+                labelPS.removeBeanChangeListener(this);
             nodePS = null;
             edgePS = null;
             labelPS = null;
@@ -872,8 +874,10 @@ public class GraphExplorerMain extends javax.swing.JFrame
                 PlaneGraphAdapter adapter = ac.getComponent().getAdapter();
                 propertyRP.add(nodePS = new PropertySheet(adapter.getNodeRenderer()), "Nodes");
                 propertyRP.add(edgePS = new PropertySheet(adapter.getEdgeRenderer()), "Edges");
+                propertyRP.add(labelPS = new PropertySheet(adapter.getNodeLabelRenderer()), "Labels");
                 nodePS.addBeanChangeListener(this);
                 edgePS.addBeanChangeListener(this);
+                labelPS.addBeanChangeListener(this);
 //                VPointGraph vg = ac.getComponent().getAdapter().getViewGraph();
 //                propertyRP.add(new PropertySheet(vg), "Graph");
             } catch (Exception ex) {

@@ -220,16 +220,6 @@ public final class GraphDecorController extends AbstractGraphController
     // DECOR PROPERTY GETTERS
     //
 
-    /** @return label corresponding to specified node in graph */
-    public String labelOf(Object node) {
-        if (baseGraph instanceof ValuedGraph) {
-            return ((ValuedGraph) baseGraph).getValue(node).toString();
-        } else {
-            reportStatus("ERROR: unable to return node label: graph is not a valued graph!");
-            return node.toString();
-        }
-    }
-
     /** @return weight/size of specified node (as a percentage of maximum size) */
     public double weightOf(Object node) {
         if (values == null) return 1.0;
@@ -251,29 +241,6 @@ public final class GraphDecorController extends AbstractGraphController
                     : 1.0;
         }
         return 1.0;
-    }
-
-    //
-    // DECOR PROPERTY SETTERS
-    //
-
-    /**
-     * Sets the label corresponding to the specified node in the graph.
-     * If the graph is already a "valued graph", this updates the value.
-     * If not, returns an error.
-     *
-     * @param node the node to label
-     * @param label the label of the node
-     */
-    public void setNodeLabel(Object node, String label) {
-        if (baseGraph instanceof ValuedGraph) {
-            ValuedGraph vg = (ValuedGraph) baseGraph;
-            Object oldValue = vg.getValue(node);
-            vg.setValue(node, label);
-            pcs.firePropertyChange($NODE_CUSTOMIZER, oldValue, label);
-        } else {
-            reportStatus("ERROR: unable to change node label: graph is not a valued graph!");
-        }
     }
 
 }

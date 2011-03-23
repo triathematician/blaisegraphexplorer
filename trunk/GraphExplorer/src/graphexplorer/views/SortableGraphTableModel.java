@@ -139,6 +139,21 @@ public class SortableGraphTableModel extends AbstractTableModel
             resort();
         return gtm.getValueAt(sortRows.get(row), col);
     }
+
+    @Override
+    public void setValueAt(Object aValue, int row, int col) {
+        if (row >= sortRows.size())
+            resort();
+        gtm.setValueAt(aValue, sortRows.get(row), col);
+    }
+
+    @Override
+    public boolean isCellEditable(int row, int col) {
+        if (row >= sortRows.size())
+            resort();
+        return gtm.isCellEditable(sortRows.get(row), col);
+    }
+
     // </editor-fold>
     
 

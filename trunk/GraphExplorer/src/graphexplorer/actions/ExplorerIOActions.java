@@ -38,6 +38,7 @@ import org.bm.blaise.scio.graph.Graph;
 import org.bm.blaise.scio.graph.ValuedGraph;
 import org.bm.blaise.scio.graph.io.*;
 import org.bm.blaise.scio.graph.io.AbstractGraphIO.GraphType;
+import org.bm.blaise.scio.graph.time.InterpolationTimeGraph;
 import org.bm.blaise.scio.graph.time.TimeGraph;
 import org.bm.blaise.specto.PlotComponent;
 import util.io.FileNameExtensionFilter;
@@ -122,6 +123,7 @@ public class ExplorerIOActions {
             initFileChooser();
             fc.setFilterGroup(ChooserFilter.GRAPH);
             fc.setApproveButtonText("Load");
+            fc.setDialogTitle("Load a graph");
             if (openFile != null) {
                 fc.setCurrentDirectory(openFile);
                 fc.setSelectedFile(openFile);
@@ -136,9 +138,10 @@ public class ExplorerIOActions {
                     return;
                 }
                 GraphController gc = null;
-                if (loaded instanceof TimeGraph)
-                    gc = new TimeGraphController((TimeGraph<Integer>) loaded, openFile.getName());
-                else if (loaded instanceof Graph) {
+                if (loaded instanceof TimeGraph) {
+                    TimeGraph interp = new InterpolationTimeGraph((TimeGraph<Integer>) loaded, 3);
+                    gc = new TimeGraphController(interp, openFile.getName());
+                } else if (loaded instanceof Graph) {
                     Graph<Integer> gl = (Graph<Integer>) loaded;
                     gc = new GraphController(gl, openFile.getName());
                     if (loc != null && loc.size() > 0) {
@@ -199,6 +202,7 @@ public class ExplorerIOActions {
             initFileChooser();
             fc.setFilterGroup(ChooserFilter.GRAPH);
             fc.setApproveButtonText("Save");
+            fc.setDialogTitle("Save current graph");
             if (openFile != null) {
                 fc.setCurrentDirectory(openFile);
                 fc.setSelectedFile(openFile);
@@ -323,6 +327,7 @@ public class ExplorerIOActions {
                 initFileChooser();
                 fc.setFilterGroup(ChooserFilter.MOVIE, filter);
                 fc.setApproveButtonText("Export");
+                fc.setDialogTitle("Export movie of current dynamic graph");
                 if (openFile != null) {
                     fc.setCurrentDirectory(openFile);
                     fc.setSelectedFile(deriveFile(openFile,".mov"));
@@ -382,28 +387,27 @@ public class ExplorerIOActions {
          *   used for the active selected filter
          */
         private void setFilterGroup(ChooserFilter group, FileFilter... filters) {
-            if (filterGroup != group) {
-                filterGroup = group;
-                resetChoosableFileFilters();
-                for (FileFilter ff : filters)
-                    addChoosableFileFilter(ff);
-                switch(group) {
-                    case GRAPH:
-                        setApproveButtonText("OK");
-                        for (AbstractGraphIO agio : ios)
-                            addChoosableFileFilter(agio.getFileFilter());
-                        setFileFilter(ios.get(1).getFileFilter());
-                        break;
-                    case IMAGE:
-                        setApproveButtonText("Export");
-                        break;
-                    case MOVIE:
-                        setApproveButtonText("Export");
-                        break;
-                }
-                if (filters.length > 0)
-                    setFileFilter(filters[0]);
+            filterGroup = group;
+            resetChoosableFileFilters();
+            for (FileFilter ff : filters)
+                addChoosableFileFilter(ff);
+            switch(group) {
+                case GRAPH:
+                    for (AbstractGraphIO agio : ios)
+                        addChoosableFileFilter(agio.getFileFilter());
+                    setFileFilter(ios.get(1).getFileFilter());
+                    break;
+                case IMAGE:
+                    setDialogTitle("Export image of current graph");
+                    setApproveButtonText("Export");
+                    break;
+                case MOVIE:
+                    setDialogTitle("Export movie of current graph");
+                    setApproveButtonText("Export");
+                    break;
             }
+            if (filters.length > 0)
+                setFileFilter(filters[0]);
         }
 
         /** @return the io method corresponding to the selected filter, or null if the "allow all" option is selected */

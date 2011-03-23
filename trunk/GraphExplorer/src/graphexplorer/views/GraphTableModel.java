@@ -114,7 +114,7 @@ public final class GraphTableModel extends AbstractTableModel
                 case COL_NODE :
                     return node;
                 case COL_LABEL :
-                    Object value = graph instanceof ValuedGraph ? ((ValuedGraph)graph).getValue(node) : null;
+                    Object value = gc.getNodeLabel(node);
                     if (value == null)
                         return null;
                     else if (value.getClass().isArray()) {
@@ -146,15 +146,16 @@ public final class GraphTableModel extends AbstractTableModel
         return col == COL_LABEL;
     }
 
-    @Override public boolean isCellEditable(int row, int col) {
-        return gc.getViewGraph() instanceof ValuedGraph && col == COL_LABEL;
+    @Override
+    public boolean isCellEditable(int row, int col) {
+        return gc.getBaseGraph() instanceof ValuedGraph && col == COL_LABEL;
     }
     
     @Override
     public void setValueAt(Object aValue, int row, int col) {
         if (!isCellEditable(row, col))
             throw new IllegalArgumentException("GraphTableModel: cannot set value at (row, col) = (" + row + ", " + col + ") to " + aValue);
-        gc.setNodeLabel(gc.getViewGraph().nodes().get(row), aValue.toString());
+        gc.setNodeLabel(getValueAt(row, COL_NODE), aValue);
     }
     // </editor-fold>
 
