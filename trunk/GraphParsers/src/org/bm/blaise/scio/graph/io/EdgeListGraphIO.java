@@ -77,7 +77,7 @@ public final class EdgeListGraphIO extends AbstractGraphIO {
                         // ignore spaces on either side of line
                         line = line.trim();
                         // expect this to be completely space delimited... we are only interested in the first 2 entries
-                        String[] split = line.split("[,\\]s+");
+                        String[] split = line.split("[,\\s]+");
                         if (split.length > 2)
                             System.out.println("WARNING -- lines should not have more than 2 entries on line " + lineNumber + ": " + line);
                         Integer v1 = Integer.decode(split[0]);
