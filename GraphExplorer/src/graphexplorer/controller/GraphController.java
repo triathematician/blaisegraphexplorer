@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import org.bm.blaise.graphics.renderer.PointRenderer;
 import org.bm.blaise.scio.graph.Graph;
+import org.bm.blaise.scio.graph.ValuedGraph;
 import org.bm.blaise.scio.graph.layout.IterativeGraphLayout;
 import org.bm.blaise.scio.graph.layout.StaticGraphLayout;
 import org.bm.blaise.scio.graph.metrics.NodeMetric;
@@ -187,9 +188,14 @@ public class GraphController extends AbstractGraphController
     /** Sets nodes that have highlights */
     public void setHighlightNodes(Set subset) { gdc.setHighlightNodes(subset); }
     /** @return label of specified node */
-    public Object getNodeLabel(Object node) { return gdc.labelOf(node); }
+    public Object getNodeLabel(Object node) { return baseGraph instanceof ValuedGraph ? ((ValuedGraph)baseGraph).getValue(node) : null; }
     /** Sets visible label at specified node */
-    public void setNodeLabel(Object node, String label) { gdc.setNodeLabel(node, label); }
+    public void setNodeLabel(Object node, Object label) {
+        if (baseGraph instanceof ValuedGraph) {
+            ((ValuedGraph)baseGraph).setValue(node, label);
+            component.getAdapter().updateNodeLabels();
+        }
+    }
     // </editor-fold>
 
 
