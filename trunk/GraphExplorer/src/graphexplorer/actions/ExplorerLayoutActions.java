@@ -5,6 +5,7 @@
 
 package graphexplorer.actions;
 
+import graphexplorer.GraphExplorerMain;
 import graphexplorer.controller.GraphController;
 import graphexplorer.controller.TimeGraphController;
 import java.awt.event.ActionEvent;
@@ -44,7 +45,7 @@ public class ExplorerLayoutActions {
         LAYOUT_TIME_START.setEnabled(controller instanceof TimeGraphController);
     }
 
-    public Action LAYOUT_CIRCULAR = new AbstractAction("Circular layout", ExplorerActions.loadIcon("layout-circle18")) {
+    public Action LAYOUT_CIRCULAR = new AbstractAction("Circular layout", GraphExplorerMain.loadIcon("layout-circle18")) {
         {
             putValue(SHORT_DESCRIPTION, "Place nodes of current graph around a circle.");
             putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.ALT_DOWN_MASK));
@@ -57,7 +58,7 @@ public class ExplorerLayoutActions {
         }
     };
 
-    public Action LAYOUT_RANDOM = new AbstractAction("Random layout", ExplorerActions.loadIcon("layout-random18")) {
+    public Action LAYOUT_RANDOM = new AbstractAction("Random layout", GraphExplorerMain.loadIcon("layout-random18")) {
         {
             putValue(SHORT_DESCRIPTION, "Place nodes of current graph in random locations.");
             putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.ALT_DOWN_MASK));
@@ -71,7 +72,7 @@ public class ExplorerLayoutActions {
     };
 
     public Action LAYOUT_SPRING_STATIC = new BackgroundLayoutAction(
-            "Spring layout (static)", ExplorerActions.loadIcon("layout-spring18"),
+            "Spring layout (static)", GraphExplorerMain.loadIcon("layout-spring18"),
             "Place nodes of current graph using an iterated spring layout algorithm (runs in background).");
 
     class BackgroundLayoutAction extends AbstractAction implements Runnable {
@@ -96,7 +97,7 @@ public class ExplorerLayoutActions {
         }
     };
 
-    public Action LAYOUT_ENERGY_START = new AbstractAction("Spring layout - start", ExplorerActions.loadIcon("play18")) {
+    public Action LAYOUT_ENERGY_START = new AbstractAction("Spring layout - start", GraphExplorerMain.loadIcon("play18")) {
         {
             putValue(SHORT_DESCRIPTION, "Set the active layout algorithm to a spring-based layout algorithm," +
                     " and begin animation.");
@@ -113,7 +114,7 @@ public class ExplorerLayoutActions {
         }
     };
 
-    public Action LAYOUT_TIME_START = new AbstractAction("Time Spring layout - start", ExplorerActions.loadIcon("play18")) {
+    public Action LAYOUT_TIME_START = new AbstractAction("Time Spring layout - start", GraphExplorerMain.loadIcon("play18")) {
         {
             putValue(SHORT_DESCRIPTION, "Set the active layout algorithm to a time/spring-based layout algorithm," +
                     " and begin animation.");
@@ -130,7 +131,7 @@ public class ExplorerLayoutActions {
         }
     };
 
-    public Action LAYOUT_ITERATE = new AbstractAction("Iterate layout", ExplorerActions.loadIcon("step18")) {
+    public Action LAYOUT_ITERATE = new AbstractAction("Iterate layout", GraphExplorerMain.loadIcon("step18")) {
         {
             putValue(SHORT_DESCRIPTION, "Runs a single iteration of the currently active iterative layout algorithm.");
             putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.ALT_DOWN_MASK));
@@ -143,7 +144,7 @@ public class ExplorerLayoutActions {
         }
     };
 
-    public Action LAYOUT_STOP = new AbstractAction("Stop layout animation", ExplorerActions.loadIcon("stop18")) {
+    public Action LAYOUT_STOP = new AbstractAction("Stop layout animation", GraphExplorerMain.loadIcon("stop18")) {
         {
             putValue(SHORT_DESCRIPTION, "Stop animation of the currently active iterative layout algorithm.");
             putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.ALT_DOWN_MASK));

@@ -5,6 +5,7 @@
 
 package graphexplorer.actions;
 
+import graphexplorer.GraphExplorerMain;
 import graphexplorer.controller.GraphDecorController;
 import graphexplorer.views.GraphListModel;
 import java.awt.Dimension;
@@ -35,7 +36,7 @@ public class ExplorerDecorActions {
         HIGHLIGHT.setEnabled(nonNull);
     }
 
-    public Action HIGHLIGHT = new AbstractAction("Highlight subset of nodes", ExplorerActions.loadIcon("highlight18")) {
+    public Action HIGHLIGHT = new AbstractAction("Highlight subset of nodes", GraphExplorerMain.loadIcon("highlight18")) {
         {
             putValue(SHORT_DESCRIPTION, "Select 1 or more nodes to display as highlighted.");
             setEnabled(true);

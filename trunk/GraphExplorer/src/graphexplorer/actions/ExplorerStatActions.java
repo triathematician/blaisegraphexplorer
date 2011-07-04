@@ -5,6 +5,7 @@
 
 package graphexplorer.actions;
 
+import graphexplorer.GraphExplorerMain;
 import graphexplorer.controller.GraphStatController;
 import graphexplorer.dialogs.CooperationPanel;
 import java.awt.event.ActionEvent;
@@ -104,7 +105,7 @@ public class ExplorerStatActions {
         }
     };
 
-    public Action COOPERATION = new AbstractAction("Compute cooperation scores (experimental)", ExplorerActions.loadIcon("cooperation18")) {
+    public Action COOPERATION = new AbstractAction("Compute cooperation scores (experimental)", GraphExplorerMain.loadIcon("cooperation18")) {
         {
             putValue(SHORT_DESCRIPTION, "Compute cooperation scores for active graph, based upon a metric and a selected subset.");
             setEnabled(true);
