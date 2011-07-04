@@ -11,7 +11,6 @@ import graphexplorer.controller.GraphController;
 import graphexplorer.views.TimeMetricPlot;
 import graphexplorer.actions.ExplorerLayoutActions;
 import graphexplorer.actions.ExplorerGenerateActions;
-import graphexplorer.actions.ExplorerActions;
 import graphexplorer.actions.ExplorerIOActions;
 import data.propertysheet.PropertySheet;
 import data.propertysheet.editor.EditorRegistration;
@@ -24,25 +23,34 @@ import graphexplorer.controller.GraphStatController;
 import graphexplorer.controller.TimeGraphController;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.geom.Point2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractButton;
+import javax.swing.ImageIcon;
+import javax.swing.JEditorPane;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JScrollPane;
 import javax.swing.UIManager;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import org.bm.blaise.scio.graph.layout.IterativeGraphLayout;
+import org.bm.blaise.specto.plane.PlanePlotComponent;
 import org.bm.blaise.specto.plane.graph.*;
 import org.bm.blaise.specto.plane.graph.time.TimeGraphComponent;
 import org.jdesktop.application.Action;
@@ -59,8 +67,22 @@ import org.jdesktop.application.SingleFrameApplication;
 public class GraphExplorerMain extends javax.swing.JFrame
         implements GraphExplorerInterface,
             PropertyChangeListener {
+    
 
-    // <editor-fold defaultstate="collapsed" desc="Application Code">
+    // <editor-fold defaultstate="collapsed" desc="APPLICATION CODE">
+    //
+    // APPLICATION CODE
+    //
+
+    /**
+    * @param args the command line arguments
+    */
+    public static void main(String args[]) {
+        Application.launch(GraphExplorerMain.App.class, args);
+    }
+
+    /** Corresponds to the App inner class's rsc file */
+    ResourceMap rsc;
 
     /** Class that contains the application context. */
     public static class App extends SingleFrameApplication {
@@ -88,22 +110,97 @@ public class GraphExplorerMain extends javax.swing.JFrame
         }
     }
 
-    ResourceMap rsc;
-    
+    /** Loads an image icon for the specified relative path */
+    @Deprecated
+    public static ImageIcon loadIcon(String path) {
+        URL url = GraphExplorerMain.class.getResource("/graphexplorer/resources/"+path+".png");
+        if (url == null) {
+            System.out.println("Unable to load icon /graphexplorer/resources/" + path + ".png");
+            return null;
+        }
+        return new ImageIcon(url);
+    }
+    // </editor-fold>
+
+
+    // <editor-fold defaultstate="collapsed" desc="FILE/HELP MENU ACTIONS">
+    //
+    // FILE MENU ACTIONS
+    //
+
+    @Action
+    public void quit() {
+        System.exit(0);
+    }
+
+
     @Action
     public void showAbout() {
         JOptionPane.showMessageDialog(this, rsc.getString("aboutText"));
     }
 
-    /**
-    * @param args the command line arguments
-    */
-    public static void main(String args[]) {
-        Application.launch(GraphExplorerMain.App.class, args);
-    }
+    @Action
+    public void showHelp() {
+        JEditorPane editorPane = new JEditorPane();
+        editorPane.setEditable(false);
+        java.net.URL helpURL = null;
+        try {
+            String filename = rsc.getResourcesDir() + rsc.getString("helpFile");
+            helpURL = rsc.getClassLoader().getResource(filename);
+            editorPane.setPage(helpURL);
+        } catch (Exception ex) {
+            Logger.getLogger(GraphExplorerMain.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println("Attempted to read a bad URL: " + helpURL);
+            return;
+        }
 
+        //Put the editor pane in a scroll pane.
+        JScrollPane editorScrollPane = new JScrollPane(editorPane);
+        editorScrollPane.setVerticalScrollBarPolicy(
+                        JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        editorScrollPane.setPreferredSize(new Dimension(480, 640));
+
+        JOptionPane.showMessageDialog(null,
+                editorScrollPane,
+                rsc.getString("helpFrameTitle"), JOptionPane.QUESTION_MESSAGE);
+    }
+    
     // </editor-fold>
 
+
+    // <editor-fold defaultstate="collapsed" desc="VIEW MENU ACTIONS">
+    //
+    // VIEW MENU ACTIONS
+    //
+
+    @Action
+    public void fitToWindow() {
+        GraphController gc = controller();
+        if (gc != null) {
+            PlanePlotComponent plot = (PlanePlotComponent) graphPlot();
+            List nodes = gc.getViewNodes();
+            Map<Object, Point2D.Double> pos = gc.getNodePositions();
+            double minX = Double.MAX_VALUE, minY = Double.MAX_VALUE,
+                    maxX = -Double.MAX_VALUE, maxY = -Double.MAX_VALUE;
+            for (Object o : nodes) {
+                Point2D.Double p = pos.get(o);
+                if (p != null) {
+                    minX = Math.min(minX, p.x);
+                    minY = Math.min(minY, p.y);
+                    maxX = Math.max(maxX, p.x);
+                    maxY = Math.max(maxY, p.y);
+                }
+            }
+            double rangeX = minX == maxX ? 1 : maxX - minX;
+            double rangeY = minY == maxY ? 1 : maxY - minY;
+            plot.setDesiredRange(minX - rangeX / 10., minY - rangeY / 10., maxX + rangeX / 10., maxY + rangeY / 10.);
+        }
+    }
+    
+    // </editor-fold>
+
+
+    
     /** Controller */
     final GraphControllerMaster master;
     /** Controllers and associated components */
@@ -113,8 +210,6 @@ public class GraphExplorerMain extends javax.swing.JFrame
     /** Chart displaying longitudinal metric data */
     TimeMetricPlot longMetricCP;
 
-    /** General actions */
-    ExplorerActions actions;
     /** File/IO actions */
     ExplorerIOActions actions_io;
     /** Statistics/metric actions */
@@ -155,8 +250,6 @@ public class GraphExplorerMain extends javax.swing.JFrame
         actions_layout = new ExplorerLayoutActions(null); // needs single controller
         actions_stat = new ExplorerStatActions(null); // needs single controller
         actions_decor = new ExplorerDecorActions(null); // needs a single controller
-
-        actions = new ExplorerActions(this);
     }
     
     /** Stores menu items corresponding to metrics */
@@ -175,6 +268,12 @@ public class GraphExplorerMain extends javax.swing.JFrame
         for (GlobalStatEnum se : GlobalStatEnum.values())
             globalMetricM.add(new JMenuItem(actions_stat.actionOf(se)));
     }
+
+
+    // <editor-fold desc="GENERATED CODE">
+    //
+    // GENERATED CODE
+    //
 
     /** This method is called from within the constructor to
      * initialize the form.
@@ -347,8 +446,8 @@ public class GraphExplorerMain extends javax.swing.JFrame
         toolbar.add(saveTBB);
         toolbar.add(jSeparator2);
 
-        jButton1.setAction(actions.FIT_ACTION);
-        jButton1.setText("Fit");
+        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance().getContext().getActionMap(GraphExplorerMain.class, this);
+        jButton1.setAction(actionMap.get("fitToWindow")); // NOI18N
         jButton1.setFocusable(false);
         jButton1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         jButton1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -522,7 +621,6 @@ public class GraphExplorerMain extends javax.swing.JFrame
         newM.add(preferentialMI);
 
         proximityMI.setAction(actions_gen.GENERATE_PROXIMITY);
-        proximityMI.setText("Proximity...");
         newM.add(proximityMI);
 
         fileM.add(newM);
@@ -557,16 +655,14 @@ public class GraphExplorerMain extends javax.swing.JFrame
         fileM.add(exportMovieM);
         fileM.add(jSeparator6);
 
-        quitMI.setAction(actions.QUIT_ACTION);
-        quitMI.setText("Quit");
+        quitMI.setAction(actionMap.get("quit")); // NOI18N
         fileM.add(quitMI);
 
         menu.add(fileM);
 
         viewM.setText("View");
 
-        fitMI.setAction(actions.FIT_ACTION);
-        fitMI.setText("Fit to Graph");
+        fitMI.setAction(actionMap.get("fitToWindow")); // NOI18N
         viewM.add(fitMI);
 
         fullScreenMI.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_ENTER, java.awt.event.InputEvent.ALT_MASK | java.awt.event.InputEvent.SHIFT_MASK));
@@ -647,12 +743,10 @@ public class GraphExplorerMain extends javax.swing.JFrame
 
         helpM.setText("Help");
 
-        aboutMI.setAction(actions.ABOUT_ACTION);
-        aboutMI.setText("About");
+        aboutMI.setAction(actionMap.get("showAbout")); // NOI18N
         helpM.add(aboutMI);
 
-        contentMI.setAction(actions.HELP_ACTION);
-        contentMI.setText("Show Help File");
+        contentMI.setAction(actionMap.get("showHelp")); // NOI18N
         helpM.add(contentMI);
 
         menu.add(helpM);
@@ -712,6 +806,7 @@ public class GraphExplorerMain extends javax.swing.JFrame
     }//GEN-LAST:event_fullScreenMIActionPerformed
 
 
+    // <editor-fold defaultstate="collapsed" desc="VARIABLE DECLARATIONS">
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutMI;
     private javax.swing.JPanel boxP1;
@@ -817,11 +912,15 @@ public class GraphExplorerMain extends javax.swing.JFrame
     private javax.swing.JMenuItem wheelMI;
     private javax.swing.JMenuItem wheelMI1;
     // End of variables declaration//GEN-END:variables
+    // </editor-fold>
 
-    //
-    // UTILITIES
-    //
+    // </editor-fold>
 
+
+    // <editor-fold defaultstate="collapsed" desc="GraphExplorerInterface METHODS">
+    //
+    // GraphExplorerInterface METHODS
+    //
     public Component dialogComponent() {
         return this;
     }
@@ -849,6 +948,12 @@ public class GraphExplorerMain extends javax.swing.JFrame
         }
         return null;
     }
+    // </editor-fold>
+
+
+    //
+    // UPDATE METHODS
+    //
 
     /** Updates the property panel with currently active graph and energy layout */
     private void updatePropertyPanel() {
@@ -1037,10 +1142,17 @@ public class GraphExplorerMain extends javax.swing.JFrame
             System.err.println("GraphExplorerMain is not handling PC \"" + prop + "\" from " + evt);
     }
 
+    
+    // <editor-fold defaultstate="collapsed" desc="INNER CLASSES - BEANS">
+    //
+    // INNER CLASSES - BEANS
+    //
+
     /** Provides a bean to access the background color of the active plot component */
     public class BackgroundBean {
         public Color getColor() { return graphPlot() == null ? Color.WHITE : graphPlot().getBackground(); }
         public void setColor(Color col) { if (graphPlot() != null) graphPlot().setBackground(col); }
     }
+    // </editor-fold>
 
 }

@@ -244,10 +244,9 @@
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="quitMI">
               <Properties>
-                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="actions.QUIT_ACTION" type="code"/>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="graphexplorer.GraphExplorerMain" id="quit" methodName="quit"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Quit"/>
               </Properties>
             </MenuItem>
           </SubComponents>
@@ -259,10 +258,9 @@
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="fitMI">
               <Properties>
-                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="actions.FIT_ACTION" type="code"/>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="graphexplorer.GraphExplorerMain" id="fitToWindow" methodName="fitToWindow"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Fit to Graph"/>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="fullScreenMI">
@@ -427,18 +425,16 @@
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="aboutMI">
               <Properties>
-                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="actions.ABOUT_ACTION" type="code"/>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="graphexplorer.GraphExplorerMain" id="showAbout" methodName="showAbout"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="About"/>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="contentMI">
               <Properties>
-                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="actions.HELP_ACTION" type="code"/>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="graphexplorer.GraphExplorerMain" id="showHelp" methodName="showHelp"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Show Help File"/>
               </Properties>
             </MenuItem>
           </SubComponents>
@@ -521,10 +517,9 @@
         </Component>
         <Component class="javax.swing.JButton" name="jButton1">
           <Properties>
-            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="actions.FIT_ACTION" type="code"/>
+            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+              <action class="graphexplorer.GraphExplorerMain" id="fitToWindow" methodName="fitToWindow"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Fit"/>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="horizontalTextPosition" type="int" value="0"/>
             <Property name="verticalTextPosition" type="int" value="3"/>
