@@ -36,66 +36,14 @@ public class ExplorerLayoutActions {
     public void setController(GraphController controller) {
         this.controller = controller;
         boolean nonNull = controller != null;
-        LAYOUT_CIRCULAR.setEnabled(nonNull);
-        LAYOUT_RANDOM.setEnabled(nonNull);
-        LAYOUT_SPRING_STATIC.setEnabled(nonNull);
+//        LAYOUT_CIRCULAR.setEnabled(nonNull);
+//        LAYOUT_RANDOM.setEnabled(nonNull);
+//        LAYOUT_SPRING_STATIC.setEnabled(nonNull);
         LAYOUT_ENERGY_START.setEnabled(nonNull);
         LAYOUT_STOP.setEnabled(nonNull);
         LAYOUT_ITERATE.setEnabled(nonNull);
         LAYOUT_TIME_START.setEnabled(controller instanceof TimeGraphController);
     }
-
-    public Action LAYOUT_CIRCULAR = new AbstractAction("Circular layout", GraphExplorerMain.loadIcon("layout-circle18")) {
-        {
-            putValue(SHORT_DESCRIPTION, "Place nodes of current graph around a circle.");
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.ALT_DOWN_MASK));
-            putValue(MNEMONIC_KEY, KeyEvent.VK_C);
-            setEnabled(true);
-        }
-        public void actionPerformed(ActionEvent e) {
-            if (controller != null)
-                controller.applyLayout(StaticGraphLayout.CIRCLE, 5.0);
-        }
-    };
-
-    public Action LAYOUT_RANDOM = new AbstractAction("Random layout", GraphExplorerMain.loadIcon("layout-random18")) {
-        {
-            putValue(SHORT_DESCRIPTION, "Place nodes of current graph in random locations.");
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.ALT_DOWN_MASK));
-            putValue(MNEMONIC_KEY, KeyEvent.VK_R);
-            setEnabled(true);
-        }
-        public void actionPerformed(ActionEvent e) {
-            if (controller != null)
-                controller.applyLayout(StaticGraphLayout.RANDOM, 5.0);
-        }
-    };
-
-    public Action LAYOUT_SPRING_STATIC = new BackgroundLayoutAction(
-            "Spring layout (static)", GraphExplorerMain.loadIcon("layout-spring18"),
-            "Place nodes of current graph using an iterated spring layout algorithm (runs in background).");
-
-    class BackgroundLayoutAction extends AbstractAction implements Runnable {
-        Thread loaderThread = null;
-        ProgressMonitor pm;
-        public BackgroundLayoutAction(String text, Icon icon, String description) {
-            super(text, icon);
-            putValue(SHORT_DESCRIPTION, description);
-        }
-        public void actionPerformed(ActionEvent e) {
-            if (loaderThread != null)
-                return;
-            pm = new ProgressMonitor(null, "Constructing layout...", null, 0, 1);
-            loaderThread = new Thread(this);
-            loaderThread.start();
-        }
-        public void run() {
-            if (controller != null)
-                controller.applyLayout(new StaticSpringLayout(), 5.0);
-            pm.setProgress(1);
-            loaderThread = null;
-        }
-    };
 
     public Action LAYOUT_ENERGY_START = new AbstractAction("Spring layout - start", GraphExplorerMain.loadIcon("play18")) {
         {

@@ -169,7 +169,7 @@ public class ExplorerGenerateActions {
         }
     };
 
-    public Action GENERATE_PROXIMITY = new AbstractAction("New proximity random graph...", GraphExplorerMain.loadIcon("random-uniform18")) {
+    public Action GENERATE_PROXIMITY = new AbstractAction("New proximity random graph...", GraphExplorerMain.loadIcon("random-proximity18")) {
         public void actionPerformed(ActionEvent e) {
             NewSimpleGraphPanel nsgp = new NewSimpleGraphPanel();
             int n = JOptionPane.showOptionDialog(null, nsgp, "New proximity random graph",
