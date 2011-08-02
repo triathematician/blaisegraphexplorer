@@ -11,7 +11,7 @@ import graphexplorer.controller.GraphController;
 import graphexplorer.views.TimeMetricPlot;
 import graphexplorer.actions.ExplorerLayoutActions;
 import graphexplorer.actions.ExplorerGenerateActions;
-import graphexplorer.actions.ExplorerIOActions;
+import graphexplorer.io.ExplorerIOActions;
 import data.propertysheet.PropertySheet;
 import data.propertysheet.editor.EditorRegistration;
 import graphexplorer.actions.ExplorerDecorActions;
@@ -26,6 +26,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -39,6 +41,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
 import javax.swing.JEditorPane;
@@ -50,6 +53,8 @@ import javax.swing.UIManager;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import org.bm.blaise.scio.graph.layout.IterativeGraphLayout;
+import org.bm.blaise.scio.graph.layout.StaticGraphLayout;
+import org.bm.blaise.scio.graph.layout.StaticSpringLayout;
 import org.bm.blaise.specto.plane.PlanePlotComponent;
 import org.bm.blaise.specto.plane.graph.*;
 import org.bm.blaise.specto.plane.graph.time.TimeGraphComponent;
@@ -59,6 +64,7 @@ import org.jdesktop.application.ApplicationActionMap;
 import org.jdesktop.application.ApplicationContext;
 import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.SingleFrameApplication;
+import org.jdesktop.application.Task;
 
 /**
  *
@@ -81,6 +87,8 @@ public class GraphExplorerMain extends javax.swing.JFrame
         Application.launch(GraphExplorerMain.App.class, args);
     }
 
+    /** The application */
+    Application app;
     /** Corresponds to the App inner class's rsc file */
     ResourceMap rsc;
 
@@ -105,7 +113,7 @@ public class GraphExplorerMain extends javax.swing.JFrame
             mainFrame = new GraphExplorerMain();
             acts = ctxt.getActionMap(mainFrame);
             mainFrame.rsc = rsc;
-            mainFrame.aboutMI.setAction(acts.get("showAbout"));
+            mainFrame.app = this;
             show(mainFrame);
         }
     }
@@ -200,6 +208,124 @@ public class GraphExplorerMain extends javax.swing.JFrame
     // </editor-fold>
 
 
+    //<editor-fold defaultstate="collapsed" desc="LAYOUT MENU ACTIONS">
+    //
+    // LAYOUT MENU ACTIONS
+    //
+    
+    //<editor-fold defaultstate="collapsed" desc="BackgroundLayoutTask CLASS">
+    /** Task that will perform a graph layout in the background */
+    private class BackgroundLayoutTask extends Task<Void,Void> 
+            implements ActionListener {
+        StaticGraphLayout layout;
+        public BackgroundLayoutTask(StaticGraphLayout layout) { 
+            super(app); 
+            this.layout = layout; 
+            setTitle("Computing Graph Layout...");
+            setDescription("Layout is Executing");
+            setMessage("Starting.");
+        }       
+        
+        @Override
+        protected Void doInBackground() throws Exception {
+            if (controller() != null) {
+                if (layout instanceof StaticSpringLayout) {
+                    ((StaticSpringLayout)layout).setLayoutListener(this);
+                    setProgress(0, 0, ((StaticSpringLayout)layout).maxSteps);
+                }
+                controller().applyLayout(layout, 5.0);
+                fitToWindow();
+            }
+            return null;
+        }
+        public void actionPerformed(ActionEvent e) {
+            if (layout instanceof StaticSpringLayout) {
+                setMessage(e.getActionCommand());
+                String cmd = e.getActionCommand();
+                int i1 = cmd.indexOf("step = ");
+                int i2 = cmd.indexOf("/", i1);
+                Integer step = Integer.decode(cmd.substring(i1+7, i2));
+                int maxSteps = ((StaticSpringLayout)layout).maxSteps;
+                setProgress(step, 0, maxSteps);
+            }
+        }
+    }
+    //</editor-fold>
+    
+    
+        @Action(block = Task.BlockingScope.ACTION)
+    public Task layoutCircle() {
+        return new BackgroundLayoutTask(StaticGraphLayout.CIRCLE);
+    }
+
+    private class LayoutCircleTask extends org.jdesktop.application.Task<Object, Void> {
+        LayoutCircleTask(org.jdesktop.application.Application app) {
+            // Runs on the EDT.  Copy GUI state that
+            // doInBackground() depends on from parameters
+            // to LayoutCircleTask fields, here.
+            super(app);
+        }
+        @Override protected Object doInBackground() {
+            // Your Task's code here.  This method runs
+            // on a background thread, so don't reference
+            // the Swing GUI from here.
+            return null;  // return your result
+        }
+        @Override protected void succeeded(Object result) {
+            // Runs on the EDT.  Update the GUI based on
+            // the result computed by doInBackground().
+        }
+    }
+    
+        @Action(block = Task.BlockingScope.ACTION)
+    public Task layoutRandom() {
+        return new BackgroundLayoutTask(StaticGraphLayout.RANDOM);
+    }
+
+    private class LayoutRandomTask extends org.jdesktop.application.Task<Object, Void> {
+        LayoutRandomTask(org.jdesktop.application.Application app) {
+            // Runs on the EDT.  Copy GUI state that
+            // doInBackground() depends on from parameters
+            // to LayoutRandomTask fields, here.
+            super(app);
+        }
+        @Override protected Object doInBackground() {
+            // Your Task's code here.  This method runs
+            // on a background thread, so don't reference
+            // the Swing GUI from here.
+            return null;  // return your result
+        }
+        @Override protected void succeeded(Object result) {
+            // Runs on the EDT.  Update the GUI based on
+            // the result computed by doInBackground().
+        }
+    }
+    
+        @Action(block = Task.BlockingScope.APPLICATION)
+    public Task layoutSpringStatic() {
+        return new BackgroundLayoutTask(StaticSpringLayout.getInstance());
+    }
+
+    private class LayoutSpringStaticTask extends org.jdesktop.application.Task<Object, Void> {
+        LayoutSpringStaticTask(org.jdesktop.application.Application app) {
+            // Runs on the EDT.  Copy GUI state that
+            // doInBackground() depends on from parameters
+            // to LayoutSpringStaticTask fields, here.
+            super(app);
+        }
+        @Override protected Object doInBackground() {
+            // Your Task's code here.  This method runs
+            // on a background thread, so don't reference
+            // the Swing GUI from here.
+            return null;  // return your result
+        }
+        @Override protected void succeeded(Object result) {
+            // Runs on the EDT.  Update the GUI based on
+            // the result computed by doInBackground().
+        }
+    }
+    
+    //</editor-fold>
     
     /** Controller */
     final GraphControllerMaster master;
@@ -299,6 +425,7 @@ public class GraphExplorerMain extends javax.swing.JFrame
         sequenceMI1 = new javax.swing.JMenuItem();
         wattsMI1 = new javax.swing.JMenuItem();
         preferentialMI1 = new javax.swing.JMenuItem();
+        proximityMI1 = new javax.swing.JMenuItem();
         metricMenuBG = new javax.swing.ButtonGroup();
         toolbar = new javax.swing.JToolBar();
         newTBB = new javax.swing.JButton();
@@ -309,6 +436,7 @@ public class GraphExplorerMain extends javax.swing.JFrame
         jSeparator10 = new javax.swing.JToolBar.Separator();
         layoutCircleTBB = new javax.swing.JButton();
         layoutRandomTBB = new javax.swing.JButton();
+        layoutStaticTBB = new javax.swing.JButton();
         layoutEnergyTBB = new javax.swing.JToggleButton();
         jSeparator3 = new javax.swing.JToolBar.Separator();
         jPanel1 = new javax.swing.JPanel();
@@ -368,7 +496,7 @@ public class GraphExplorerMain extends javax.swing.JFrame
         layoutM = new javax.swing.JMenu();
         circularMI = new javax.swing.JMenuItem();
         randomMI = new javax.swing.JMenuItem();
-        circularMI1 = new javax.swing.JMenuItem();
+        staticSpringMI = new javax.swing.JMenuItem();
         jSeparator4 = new javax.swing.JPopupMenu.Separator();
         energyM = new javax.swing.JMenu();
         energyStartMI = new javax.swing.JMenuItem();
@@ -420,6 +548,9 @@ public class GraphExplorerMain extends javax.swing.JFrame
         preferentialMI1.setText("Preferential Attachment...");
         newPM.add(preferentialMI1);
 
+        proximityMI1.setAction(actions_gen.GENERATE_PROXIMITY);
+        newPM.add(proximityMI1);
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Graph Explorer");
 
@@ -448,23 +579,31 @@ public class GraphExplorerMain extends javax.swing.JFrame
 
         javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance().getContext().getActionMap(GraphExplorerMain.class, this);
         jButton1.setAction(actionMap.get("fitToWindow")); // NOI18N
+        jButton1.setText("");
         jButton1.setFocusable(false);
         jButton1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         jButton1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolbar.add(jButton1);
         toolbar.add(jSeparator10);
 
-        layoutCircleTBB.setAction(actions_layout.LAYOUT_CIRCULAR);
-        layoutCircleTBB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/layout-circle24.png"))); // NOI18N
+        layoutCircleTBB.setAction(actionMap.get("layoutCircle")); // NOI18N
+        layoutCircleTBB.setText("");
         layoutCircleTBB.setFocusable(false);
         toolbar.add(layoutCircleTBB);
 
-        layoutRandomTBB.setAction(actions_layout.LAYOUT_RANDOM);
-        layoutRandomTBB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/layout-random24.png"))); // NOI18N
+        layoutRandomTBB.setAction(actionMap.get("layoutRandom")); // NOI18N
+        layoutRandomTBB.setText("");
         layoutRandomTBB.setFocusable(false);
         toolbar.add(layoutRandomTBB);
 
-        layoutEnergyTBB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/layout-spring24.png"))); // NOI18N
+        layoutStaticTBB.setAction(actionMap.get("layoutSpringStatic")); // NOI18N
+        layoutStaticTBB.setText("");
+        layoutStaticTBB.setFocusable(false);
+        layoutStaticTBB.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        layoutStaticTBB.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolbar.add(layoutStaticTBB);
+
+        layoutEnergyTBB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/play24.png"))); // NOI18N
         layoutEnergyTBB.setToolTipText("Start/stop animation of the spring layout algorithm for currently displayed graph.");
         layoutEnergyTBB.setFocusable(false);
         layoutEnergyTBB.addActionListener(new java.awt.event.ActionListener() {
@@ -646,6 +785,7 @@ public class GraphExplorerMain extends javax.swing.JFrame
         exportImageM.setEnabled(false);
         fileM.add(exportImageM);
 
+        exportMovieM.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/export-movie18.png"))); // NOI18N
         exportMovieM.setText("Export movie");
         exportMovieM.setEnabled(false);
 
@@ -678,14 +818,14 @@ public class GraphExplorerMain extends javax.swing.JFrame
 
         layoutM.setText("Layout");
 
-        circularMI.setAction(actions_layout.LAYOUT_CIRCULAR);
+        circularMI.setAction(actionMap.get("layoutCircle")); // NOI18N
         layoutM.add(circularMI);
 
-        randomMI.setAction(actions_layout.LAYOUT_RANDOM);
+        randomMI.setAction(actionMap.get("layoutRandom")); // NOI18N
         layoutM.add(randomMI);
 
-        circularMI1.setAction(actions_layout.LAYOUT_SPRING_STATIC);
-        layoutM.add(circularMI1);
+        staticSpringMI.setAction(actionMap.get("layoutSpringStatic")); // NOI18N
+        layoutM.add(staticSpringMI);
         layoutM.add(jSeparator4);
 
         energyM.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/layout-spring18.png"))); // NOI18N
@@ -817,7 +957,6 @@ public class GraphExplorerMain extends javax.swing.JFrame
     private javax.swing.JMenuItem circleMI;
     private javax.swing.JMenuItem circleMI1;
     private javax.swing.JMenuItem circularMI;
-    private javax.swing.JMenuItem circularMI1;
     private javax.swing.JMenuItem closeMI;
     private javax.swing.JMenuItem completeMI;
     private javax.swing.JMenuItem completeMI1;
@@ -864,6 +1003,7 @@ public class GraphExplorerMain extends javax.swing.JFrame
     private javax.swing.JMenu layoutM;
     private data.propertysheet.PropertySheet layoutPS;
     private javax.swing.JButton layoutRandomTBB;
+    private javax.swing.JButton layoutStaticTBB;
     private javax.swing.JMenuItem loadMI;
     private javax.swing.JButton loadTBB;
     private javax.swing.JMenu localMetricM;
@@ -890,6 +1030,7 @@ public class GraphExplorerMain extends javax.swing.JFrame
     private gui.RollupPanel propertyRP;
     private javax.swing.JScrollPane propertySP;
     private javax.swing.JMenuItem proximityMI;
+    private javax.swing.JMenuItem proximityMI1;
     private javax.swing.JMenuItem quitMI;
     private javax.swing.JMenuItem randomMI;
     private javax.swing.JMenuItem saveMI;
@@ -900,6 +1041,7 @@ public class GraphExplorerMain extends javax.swing.JFrame
     private javax.swing.JMenu specialM;
     private javax.swing.JMenuItem starMI;
     private javax.swing.JMenuItem starMI1;
+    private javax.swing.JMenuItem staticSpringMI;
     private javax.swing.JPanel statusB;
     private javax.swing.JLabel statusL;
     private javax.swing.JMenuItem timeStartMI;

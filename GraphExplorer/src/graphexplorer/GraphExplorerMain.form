@@ -85,6 +85,13 @@
             <Property name="text" type="java.lang.String" value="Preferential Attachment..."/>
           </Properties>
         </MenuItem>
+        <MenuItem class="javax.swing.JMenuItem" name="proximityMI1">
+          <Properties>
+            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="actions_gen.GENERATE_PROXIMITY" type="code"/>
+            </Property>
+          </Properties>
+        </MenuItem>
       </SubComponents>
     </Container>
     <Component class="javax.swing.ButtonGroup" name="metricMenuBG">
@@ -229,6 +236,9 @@
             </Menu>
             <Menu class="javax.swing.JMenu" name="exportMovieM">
               <Properties>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/graphexplorer/resources/export-movie18.png"/>
+                </Property>
                 <Property name="text" type="java.lang.String" value="Export movie"/>
                 <Property name="enabled" type="boolean" value="false"/>
               </Properties>
@@ -283,22 +293,22 @@
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="circularMI">
               <Properties>
-                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="actions_layout.LAYOUT_CIRCULAR" type="code"/>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="graphexplorer.GraphExplorerMain" id="layoutCircle" methodName="layoutCircle"/>
                 </Property>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="randomMI">
               <Properties>
-                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="actions_layout.LAYOUT_RANDOM" type="code"/>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="graphexplorer.GraphExplorerMain" id="layoutRandom" methodName="layoutRandom"/>
                 </Property>
               </Properties>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="circularMI1">
+            <MenuItem class="javax.swing.JMenuItem" name="staticSpringMI">
               <Properties>
-                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="actions_layout.LAYOUT_SPRING_STATIC" type="code"/>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="graphexplorer.GraphExplorerMain" id="layoutSpringStatic" methodName="layoutSpringStatic"/>
                 </Property>
               </Properties>
             </MenuItem>
@@ -520,6 +530,7 @@
             <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
               <action class="graphexplorer.GraphExplorerMain" id="fitToWindow" methodName="fitToWindow"/>
             </Property>
+            <Property name="text" type="java.lang.String" value=""/>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="horizontalTextPosition" type="int" value="0"/>
             <Property name="verticalTextPosition" type="int" value="3"/>
@@ -529,30 +540,37 @@
         </Component>
         <Component class="javax.swing.JButton" name="layoutCircleTBB">
           <Properties>
-            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="actions_layout.LAYOUT_CIRCULAR" type="code"/>
+            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+              <action class="graphexplorer.GraphExplorerMain" id="layoutCircle" methodName="layoutCircle"/>
             </Property>
-            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/graphexplorer/resources/layout-circle24.png"/>
-            </Property>
+            <Property name="text" type="java.lang.String" value=""/>
             <Property name="focusable" type="boolean" value="false"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JButton" name="layoutRandomTBB">
           <Properties>
-            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="actions_layout.LAYOUT_RANDOM" type="code"/>
+            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+              <action class="graphexplorer.GraphExplorerMain" id="layoutRandom" methodName="layoutRandom"/>
             </Property>
-            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/graphexplorer/resources/layout-random24.png"/>
-            </Property>
+            <Property name="text" type="java.lang.String" value=""/>
             <Property name="focusable" type="boolean" value="false"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JButton" name="layoutStaticTBB">
+          <Properties>
+            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+              <action class="graphexplorer.GraphExplorerMain" id="layoutSpringStatic" methodName="layoutSpringStatic"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value=""/>
+            <Property name="focusable" type="boolean" value="false"/>
+            <Property name="horizontalTextPosition" type="int" value="0"/>
+            <Property name="verticalTextPosition" type="int" value="3"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JToggleButton" name="layoutEnergyTBB">
           <Properties>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/graphexplorer/resources/layout-spring24.png"/>
+              <Image iconType="3" name="/graphexplorer/resources/play24.png"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" value="Start/stop animation of the spring layout algorithm for currently displayed graph."/>
             <Property name="focusable" type="boolean" value="false"/>
