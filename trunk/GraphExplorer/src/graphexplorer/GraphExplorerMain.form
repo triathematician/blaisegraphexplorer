@@ -284,6 +284,15 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="fullScreenMIActionPerformed"/>
               </Events>
             </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator11">
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="showEdMI">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="graphexplorer.GraphExplorerMain" id="showEditorDialog" methodName="showEditorDialog"/>
+                </Property>
+              </Properties>
+            </MenuItem>
           </SubComponents>
         </Menu>
         <Menu class="javax.swing.JMenu" name="layoutM">
@@ -398,10 +407,17 @@
             <Property name="text" type="java.lang.String" value="Special"/>
           </Properties>
           <SubComponents>
-            <MenuItem class="javax.swing.JMenuItem" name="highlightMI">
+            <MenuItem class="javax.swing.JCheckBoxMenuItem" name="highlightB">
               <Properties>
-                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="actions_decor.HIGHLIGHT" type="code"/>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="graphexplorer.GraphExplorerMain" id="highlightSubset" methodName="highlightSubset"/>
+                </Property>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JCheckBoxMenuItem" name="distinctB">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="graphexplorer.GraphExplorerMain" id="distinctColors" methodName="distinctColors"/>
                 </Property>
               </Properties>
             </MenuItem>
@@ -416,13 +432,6 @@
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
                   <Connection code="actions_gen.GENERATE_PRIME" type="code"/>
-                </Property>
-              </Properties>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="distinctColorMI">
-              <Properties>
-                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="actions_decor.DISTINCT_COLOR" type="code"/>
                 </Property>
               </Properties>
             </MenuItem>
@@ -530,7 +539,6 @@
             <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
               <action class="graphexplorer.GraphExplorerMain" id="fitToWindow" methodName="fitToWindow"/>
             </Property>
-            <Property name="text" type="java.lang.String" value=""/>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="horizontalTextPosition" type="int" value="0"/>
             <Property name="verticalTextPosition" type="int" value="3"/>
@@ -543,7 +551,6 @@
             <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
               <action class="graphexplorer.GraphExplorerMain" id="layoutCircle" methodName="layoutCircle"/>
             </Property>
-            <Property name="text" type="java.lang.String" value=""/>
             <Property name="focusable" type="boolean" value="false"/>
           </Properties>
         </Component>
@@ -552,7 +559,6 @@
             <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
               <action class="graphexplorer.GraphExplorerMain" id="layoutRandom" methodName="layoutRandom"/>
             </Property>
-            <Property name="text" type="java.lang.String" value=""/>
             <Property name="focusable" type="boolean" value="false"/>
           </Properties>
         </Component>
@@ -561,7 +567,6 @@
             <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
               <action class="graphexplorer.GraphExplorerMain" id="layoutSpringStatic" methodName="layoutSpringStatic"/>
             </Property>
-            <Property name="text" type="java.lang.String" value=""/>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="horizontalTextPosition" type="int" value="0"/>
             <Property name="verticalTextPosition" type="int" value="3"/>

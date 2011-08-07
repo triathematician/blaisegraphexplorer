@@ -307,7 +307,7 @@ public class ExplorerIOActions {
 
         /** Construct a new movie action */
         public MovieAction(GraphController gc, TimeGraphComponent lgp) {
-            super("Quicktime movie (.mov)", GraphExplorerMain.loadIcon("export-mov18"));
+            super("Quicktime movie (.mov)", GraphExplorerMain.loadIcon("export-movie18"));
             this.gc = gc;
             this.tgm = lgp;
             filter = new FileNameExtensionFilter("Quicktime movie (.mov)", "mov");
