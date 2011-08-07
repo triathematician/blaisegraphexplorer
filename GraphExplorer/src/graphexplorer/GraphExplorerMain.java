@@ -14,13 +14,13 @@ import graphexplorer.actions.ExplorerGenerateActions;
 import graphexplorer.io.ExplorerIOActions;
 import data.propertysheet.PropertySheet;
 import data.propertysheet.editor.EditorRegistration;
-import graphexplorer.actions.ExplorerDecorActions;
 import graphexplorer.actions.ExplorerStatActions;
 import graphexplorer.actions.ExplorerStatActions.GlobalStatEnum;
 import graphexplorer.actions.ExplorerStatActions.StatEnum;
 import graphexplorer.controller.GraphFilterController;
 import graphexplorer.controller.GraphStatController;
 import graphexplorer.controller.TimeGraphController;
+import graphexplorer.views.GraphListModel;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -39,12 +39,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
 import javax.swing.JEditorPane;
+import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButtonMenuItem;
@@ -181,7 +182,30 @@ public class GraphExplorerMain extends javax.swing.JFrame
     // VIEW MENU ACTIONS
     //
 
+    private FileEditorDialog fileEditor;
+    
+    @Action(enabledProperty = "graphActive")
+    public void showEditorDialog() {
+        if (controller() != null) {
+            if (fileEditor == null)
+                fileEditor = new FileEditorDialog(this);
+            else
+                fileEditor.initTextArea();
+            fileEditor.setVisible(true);
+        }
+    }    
+    
     @Action
+    public void saveEditorChanges() {
+        JOptionPane.showMessageDialog(this, "Feature not yet implemented.");
+    }
+    
+    @Action
+    public void applyEditorChanges() {
+        JOptionPane.showMessageDialog(this, "Feature not yet implemented.");
+    }
+    
+    @Action(enabledProperty = "graphActive")
     public void fitToWindow() {
         GraphController gc = controller();
         if (gc != null) {
@@ -253,79 +277,60 @@ public class GraphExplorerMain extends javax.swing.JFrame
     //</editor-fold>
     
     
-        @Action(block = Task.BlockingScope.ACTION)
+    @Action(block = Task.BlockingScope.ACTION, enabledProperty = "graphActive")
     public Task layoutCircle() {
         return new BackgroundLayoutTask(StaticGraphLayout.CIRCLE);
     }
-
-    private class LayoutCircleTask extends org.jdesktop.application.Task<Object, Void> {
-        LayoutCircleTask(org.jdesktop.application.Application app) {
-            // Runs on the EDT.  Copy GUI state that
-            // doInBackground() depends on from parameters
-            // to LayoutCircleTask fields, here.
-            super(app);
-        }
-        @Override protected Object doInBackground() {
-            // Your Task's code here.  This method runs
-            // on a background thread, so don't reference
-            // the Swing GUI from here.
-            return null;  // return your result
-        }
-        @Override protected void succeeded(Object result) {
-            // Runs on the EDT.  Update the GUI based on
-            // the result computed by doInBackground().
-        }
-    }
     
-        @Action(block = Task.BlockingScope.ACTION)
+    @Action(block = Task.BlockingScope.ACTION, enabledProperty = "graphActive")
     public Task layoutRandom() {
         return new BackgroundLayoutTask(StaticGraphLayout.RANDOM);
     }
-
-    private class LayoutRandomTask extends org.jdesktop.application.Task<Object, Void> {
-        LayoutRandomTask(org.jdesktop.application.Application app) {
-            // Runs on the EDT.  Copy GUI state that
-            // doInBackground() depends on from parameters
-            // to LayoutRandomTask fields, here.
-            super(app);
-        }
-        @Override protected Object doInBackground() {
-            // Your Task's code here.  This method runs
-            // on a background thread, so don't reference
-            // the Swing GUI from here.
-            return null;  // return your result
-        }
-        @Override protected void succeeded(Object result) {
-            // Runs on the EDT.  Update the GUI based on
-            // the result computed by doInBackground().
+    
+    @Action(block = Task.BlockingScope.APPLICATION, enabledProperty = "graphActive")
+    public Task layoutSpringStatic() {
+        return new BackgroundLayoutTask(StaticSpringLayout.getInstance());
+    }    
+    //</editor-fold>
+    
+    
+    //<editor-fold defaultstate="collapsed" desc="SPECIAL MENU ACTIONS">
+    //
+    // SPECIAL MENU ACTIONS
+    //
+    
+    @Action(enabledProperty = "graphActive")
+    public void highlightSubset() {
+        GraphController gc = controller();
+        if (gc == null)
+            return;
+        
+        GraphListModel glm = new GraphListModel(gc);
+        JList jl = new JList(glm);
+        jl.setMaximumSize(new Dimension(800,600));
+        jl.setLayoutOrientation(JList.VERTICAL_WRAP);
+        int result = JOptionPane.showConfirmDialog(null, new JScrollPane(jl), "Select 1 or more nodes",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (result == JOptionPane.OK_OPTION) {
+            int[] selected = jl.getSelectedIndices();
+            TreeSet set = new TreeSet();
+            for (int i : selected)
+                set.add(glm.getNodeAt(i));
+            gc.setHighlightNodes(set);
+            highlightB.setSelected(!set.isEmpty());
         }
     }
     
-        @Action(block = Task.BlockingScope.APPLICATION)
-    public Task layoutSpringStatic() {
-        return new BackgroundLayoutTask(StaticSpringLayout.getInstance());
-    }
-
-    private class LayoutSpringStaticTask extends org.jdesktop.application.Task<Object, Void> {
-        LayoutSpringStaticTask(org.jdesktop.application.Application app) {
-            // Runs on the EDT.  Copy GUI state that
-            // doInBackground() depends on from parameters
-            // to LayoutSpringStaticTask fields, here.
-            super(app);
-        }
-        @Override protected Object doInBackground() {
-            // Your Task's code here.  This method runs
-            // on a background thread, so don't reference
-            // the Swing GUI from here.
-            return null;  // return your result
-        }
-        @Override protected void succeeded(Object result) {
-            // Runs on the EDT.  Update the GUI based on
-            // the result computed by doInBackground().
-        }
+    @Action(enabledProperty = "graphActive")
+    public void distinctColors() {
+        GraphController gc = controller();
+        if (gc == null)
+            return;
+        gc.getDecorController().setDistinctColors(distinctB.isSelected());        
     }
     
     //</editor-fold>
+    
     
     /** Controller */
     final GraphControllerMaster master;
@@ -342,8 +347,6 @@ public class GraphExplorerMain extends javax.swing.JFrame
     ExplorerStatActions actions_stat;
     /** Layout actions */
     ExplorerLayoutActions actions_layout;
-    /** Decor actions */
-    ExplorerDecorActions actions_decor;
     /** Graph-generation actions */
     ExplorerGenerateActions actions_gen;
 
@@ -375,7 +378,6 @@ public class GraphExplorerMain extends javax.swing.JFrame
 
         actions_layout = new ExplorerLayoutActions(null); // needs single controller
         actions_stat = new ExplorerStatActions(null); // needs single controller
-        actions_decor = new ExplorerDecorActions(null); // needs a single controller
     }
     
     /** Stores menu items corresponding to metrics */
@@ -493,6 +495,8 @@ public class GraphExplorerMain extends javax.swing.JFrame
         viewM = new javax.swing.JMenu();
         fitMI = new javax.swing.JMenuItem();
         fullScreenMI = new javax.swing.JMenuItem();
+        jSeparator11 = new javax.swing.JPopupMenu.Separator();
+        showEdMI = new javax.swing.JMenuItem();
         layoutM = new javax.swing.JMenu();
         circularMI = new javax.swing.JMenuItem();
         randomMI = new javax.swing.JMenuItem();
@@ -508,10 +512,10 @@ public class GraphExplorerMain extends javax.swing.JFrame
         globalMetricM = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
         specialM = new javax.swing.JMenu();
-        highlightMI = new javax.swing.JMenuItem();
+        highlightB = new javax.swing.JCheckBoxMenuItem();
+        distinctB = new javax.swing.JCheckBoxMenuItem();
         cooperationMI = new javax.swing.JMenuItem();
         primeMI = new javax.swing.JMenuItem();
-        distinctColorMI = new javax.swing.JMenuItem();
         helpM = new javax.swing.JMenu();
         aboutMI = new javax.swing.JMenuItem();
         contentMI = new javax.swing.JMenuItem();
@@ -579,7 +583,6 @@ public class GraphExplorerMain extends javax.swing.JFrame
 
         javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance().getContext().getActionMap(GraphExplorerMain.class, this);
         jButton1.setAction(actionMap.get("fitToWindow")); // NOI18N
-        jButton1.setText("");
         jButton1.setFocusable(false);
         jButton1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         jButton1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -587,17 +590,14 @@ public class GraphExplorerMain extends javax.swing.JFrame
         toolbar.add(jSeparator10);
 
         layoutCircleTBB.setAction(actionMap.get("layoutCircle")); // NOI18N
-        layoutCircleTBB.setText("");
         layoutCircleTBB.setFocusable(false);
         toolbar.add(layoutCircleTBB);
 
         layoutRandomTBB.setAction(actionMap.get("layoutRandom")); // NOI18N
-        layoutRandomTBB.setText("");
         layoutRandomTBB.setFocusable(false);
         toolbar.add(layoutRandomTBB);
 
         layoutStaticTBB.setAction(actionMap.get("layoutSpringStatic")); // NOI18N
-        layoutStaticTBB.setText("");
         layoutStaticTBB.setFocusable(false);
         layoutStaticTBB.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         layoutStaticTBB.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -813,6 +813,10 @@ public class GraphExplorerMain extends javax.swing.JFrame
             }
         });
         viewM.add(fullScreenMI);
+        viewM.add(jSeparator11);
+
+        showEdMI.setAction(actionMap.get("showEditorDialog")); // NOI18N
+        viewM.add(showEdMI);
 
         menu.add(viewM);
 
@@ -867,17 +871,17 @@ public class GraphExplorerMain extends javax.swing.JFrame
 
         specialM.setText("Special");
 
-        highlightMI.setAction(actions_decor.HIGHLIGHT);
-        specialM.add(highlightMI);
+        highlightB.setAction(actionMap.get("highlightSubset")); // NOI18N
+        specialM.add(highlightB);
+
+        distinctB.setAction(actionMap.get("distinctColors")); // NOI18N
+        specialM.add(distinctB);
 
         cooperationMI.setAction(actions_stat.COOPERATION);
         specialM.add(cooperationMI);
 
         primeMI.setAction(actions_gen.GENERATE_PRIME);
         specialM.add(primeMI);
-
-        distinctColorMI.setAction(actions_decor.DISTINCT_COLOR);
-        specialM.add(distinctColorMI);
 
         menu.add(specialM);
 
@@ -962,7 +966,7 @@ public class GraphExplorerMain extends javax.swing.JFrame
     private javax.swing.JMenuItem completeMI1;
     private javax.swing.JMenuItem contentMI;
     private javax.swing.JMenuItem cooperationMI;
-    private javax.swing.JMenuItem distinctColorMI;
+    private javax.swing.JCheckBoxMenuItem distinctB;
     private javax.swing.JTable distributionTable;
     private javax.swing.JScrollPane distributionTableSP;
     private data.propertysheet.PropertySheet edgePS;
@@ -982,13 +986,14 @@ public class GraphExplorerMain extends javax.swing.JFrame
     private javax.swing.JMenu globalMetricM;
     private javax.swing.JTabbedPane graphTP;
     private javax.swing.JMenu helpM;
-    private javax.swing.JMenuItem highlightMI;
+    private javax.swing.JCheckBoxMenuItem highlightB;
     private javax.swing.JButton jButton1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JToolBar.Separator jSeparator10;
+    private javax.swing.JPopupMenu.Separator jSeparator11;
     private javax.swing.JToolBar.Separator jSeparator2;
     private javax.swing.JToolBar.Separator jSeparator3;
     private javax.swing.JPopupMenu.Separator jSeparator4;
@@ -1038,6 +1043,7 @@ public class GraphExplorerMain extends javax.swing.JFrame
     private javax.swing.JButton saveTBB;
     private javax.swing.JMenuItem sequenceMI;
     private javax.swing.JMenuItem sequenceMI1;
+    private javax.swing.JMenuItem showEdMI;
     private javax.swing.JMenu specialM;
     private javax.swing.JMenuItem starMI;
     private javax.swing.JMenuItem starMI1;
@@ -1063,6 +1069,7 @@ public class GraphExplorerMain extends javax.swing.JFrame
     //
     // GraphExplorerInterface METHODS
     //
+    
     public Component dialogComponent() {
         return this;
     }
@@ -1079,6 +1086,19 @@ public class GraphExplorerMain extends javax.swing.JFrame
     public GraphController controller() {
         return master.getActiveController();
     }
+    
+    private boolean active = false;
+    
+    public boolean isGraphActive() { 
+        return active; 
+    }
+    
+    public void setGraphActive(boolean val) {
+        if (active != val) {
+            active = val;
+            firePropertyChange("graphActive", !val, val);
+        }
+    }
 
     public GraphComponent graphPlot() {
         GraphController gc = master.getActiveController();
@@ -1090,8 +1110,10 @@ public class GraphExplorerMain extends javax.swing.JFrame
         }
         return null;
     }
+    
     // </editor-fold>
 
+    
 
     //
     // UPDATE METHODS
@@ -1225,8 +1247,8 @@ public class GraphExplorerMain extends javax.swing.JFrame
         }
 
         actions_stat.setController(gc == null ? null : gc.getStatController());
-        actions_decor.setController(gc == null ? null : gc.getDecorController());
         actions_layout.setController(gc == null ? null : gc);
+        setGraphActive(controller() != null && controller().getBaseGraph() != null);
         updating = false;
     }
 

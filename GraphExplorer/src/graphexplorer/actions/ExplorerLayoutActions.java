@@ -13,12 +13,8 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.Icon;
 import javax.swing.KeyStroke;
-import javax.swing.ProgressMonitor;
 import org.bm.blaise.scio.graph.layout.SpringLayout;
-import org.bm.blaise.scio.graph.layout.StaticGraphLayout;
-import org.bm.blaise.scio.graph.layout.StaticSpringLayout;
 
 /**
  * Describes layout actions supporting the graph explorer app.

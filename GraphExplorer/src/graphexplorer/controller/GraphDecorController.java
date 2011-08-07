@@ -6,6 +6,8 @@
 package graphexplorer.controller;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collections;
@@ -14,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.bm.blaise.graphics.GraphicVisibility;
 import org.bm.blaise.graphics.renderer.AbstractPointRenderer;
 import org.bm.blaise.graphics.renderer.BasicPointRenderer;
 import org.bm.blaise.graphics.renderer.BasicShapeRenderer;
@@ -21,7 +24,6 @@ import org.bm.blaise.graphics.renderer.BasicStrokeRenderer;
 import org.bm.blaise.graphics.renderer.PointRenderer;
 import org.bm.blaise.graphics.renderer.ShapeLibrary;
 import org.bm.blaise.graphics.renderer.ShapeRenderer;
-import org.bm.blaise.scio.graph.ValuedGraph;
 import org.bm.blaise.scio.graph.WeightedGraph;
 import utils.MapGetter;
 
@@ -55,11 +57,15 @@ public final class GraphDecorController extends AbstractGraphController
     private List values = null;
     /** Stores the "subset" of the graph that is currently of interest (may be null or empty) */
     private Set subset = null;
+    /** Whether to override node decor to enforce unique colors */
+    private boolean distinctColors = false;
 
     /** Edge renderer */
     private final BasicStrokeRenderer edgeRenderer = new BasicStrokeRenderer(new Color(32,128,32,192), 1f);
+    
     /** Base point renderer object */
     private final BasicPointRenderer baseRenderer = new BasicPointRenderer();
+    
     /** Highlight renderer object */
     private final AbstractPointRenderer highlightRenderer = new AbstractPointRenderer(){
         Color c = new Color(255, 128, 128);
@@ -67,10 +73,15 @@ public final class GraphDecorController extends AbstractGraphController
         @Override public float getRadius() { return baseRenderer.getRadius(); }
         @Override public ShapeRenderer getShapeRenderer() { return new BasicShapeRenderer(c, baseRenderer.getStroke(), baseRenderer.getThickness()); }
     };
+    
     /** The object that provides the "decor" for nodes */
     private MapGetter<PointRenderer> nodeDecor = null;
+
+    /** Cached color map for nodes and colors */
+    private final Map<Object,Color> colorMap = Collections.synchronizedMap(new HashMap<Object,Color>());
     // </editor-fold>
 
+    
     //
     // CONSTRUCTORS
     //
@@ -82,28 +93,11 @@ public final class GraphDecorController extends AbstractGraphController
         addPropertyChangeListener(gc);
         setBaseGraph(gc.getViewGraph());
     }
-
-    /** Cached color map for nodes and colors */
-    private final Map<Object,Color> colorMap = Collections.synchronizedMap(new HashMap<Object,Color>());
-    int i = 0;
-    /** Generates next color in sequence */
-    private Color nextColor() {
-        i++;
-        return new Color(37*i%255, 17*i%255, 67*i%255);
-    }
-
-    boolean distinctColors = false;
-
-    public void distinctColors() {
-        distinctColors = true;
-        updateDecor();
-    }
-
-    public PointRenderer getNodeRenderer() { return baseRenderer; }
-    public MapGetter<PointRenderer> getNodeCustomizer() { return nodeDecor; }
-    public BasicStrokeRenderer getEdgeRenderer() { return edgeRenderer; }
-    public MapGetter<BasicStrokeRenderer> getEdgeCustomizer() { return null; }
-
+    
+    //
+    // MAIN UPDATE METHOD
+    //
+    
     private void updateDecor() {
         if (baseGraph == null)
             return;
@@ -139,52 +133,27 @@ public final class GraphDecorController extends AbstractGraphController
         pcs.firePropertyChange($NODE_CUSTOMIZER, null, nodeDecor);
     }
 
-    /** A renderer that generally defers to a base renderer, except for radius */
-    private static class FollowRenderer extends AbstractPointRenderer {
-        private final AbstractPointRenderer base;
-        private final Float rad;
-        private final Color col;
-        FollowRenderer(AbstractPointRenderer base, float rad) {
-            this.base = base;
-            this.rad = rad;
-            col = null;
-        }
-        private FollowRenderer(AbstractPointRenderer base, Color c) {
-            this.base = base;
-            this.col = c;
-            this.rad = 1f;
-        }
-
-        private FollowRenderer(AbstractPointRenderer base, float val, Color get) {
-            this.base = base;
-            this.rad = val;
-            this.col = get;
-        }
-        @Override public ShapeLibrary getShape() { return base.getShape(); }
-        @Override public ShapeRenderer getShapeRenderer() {
-            if (col == null)
-                return base.getShapeRenderer();
-            BasicShapeRenderer r = (BasicShapeRenderer) base.getShapeRenderer();
-            return new BasicShapeRenderer(col, r.getStroke(), r.getThickness());
-        }
-        @Override public float getRadius() { return rad * base.getRadius(); }
-    }
-
-    //
-    // EVENT HANDLING
-    //
-
-    public void propertyChange(PropertyChangeEvent evt) {
-        String prop = evt.getPropertyName();
-        if (prop.equals(GraphStatController.$VALUES)) {
-            values = (List) evt.getNewValue();
-            updateDecor();
-        }
-    }
-
     //
     // PROPERTY PATTERNS
     //
+
+    public PointRenderer getNodeRenderer() { return baseRenderer; }
+    public MapGetter<PointRenderer> getNodeCustomizer() { return nodeDecor; }
+    public BasicStrokeRenderer getEdgeRenderer() { return edgeRenderer; }
+    public MapGetter<BasicStrokeRenderer> getEdgeCustomizer() { return null; }
+
+    /** Return true if each node currently has unique color */
+    public boolean isDistinctColors() {
+        return distinctColors;
+    }
+    
+    /** Overrides current node colors to give each node a different color */
+    public void setDistinctColors(boolean val) {
+        if (distinctColors != val) {
+            distinctColors = val;
+            updateDecor();
+        }
+    }
 
     /** @return highlighted subset of nodes (non-null, but maybe empty) */
     public Set getHighlightNodes() {
@@ -243,4 +212,62 @@ public final class GraphDecorController extends AbstractGraphController
         return 1.0;
     }
 
+    //
+    // EVENT HANDLING
+    //
+
+    public void propertyChange(PropertyChangeEvent evt) {
+        String prop = evt.getPropertyName();
+        if (prop.equals(GraphStatController.$VALUES)) {
+            values = (List) evt.getNewValue();
+            updateDecor();
+        }
+    }
+
+    
+    
+    //<editor-fold defaultstate="collapsed" desc="PRIVATE METHODS & INNER CLASSES">
+    //
+    // PRIVATE METHODS & INNER CLASSES
+    //
+
+    int i = 0;
+    /** Generates next color in sequence */
+    private Color nextColor() {
+        i++;
+        return new Color(37*i%255, 17*i%255, 67*i%255);
+    }
+
+    /** A renderer that generally defers to a base renderer, except for radius */
+    private static class FollowRenderer extends AbstractPointRenderer {
+        private final AbstractPointRenderer base;
+        private final Float rad;
+        private final Color col;
+        FollowRenderer(AbstractPointRenderer base, float rad) {
+            this.base = base;
+            this.rad = rad;
+            col = null;
+        }
+        private FollowRenderer(AbstractPointRenderer base, Color c) {
+            this.base = base;
+            this.col = c;
+            this.rad = 1f;
+        }
+
+        private FollowRenderer(AbstractPointRenderer base, float val, Color get) {
+            this.base = base;
+            this.rad = val;
+            this.col = get;
+        }
+        @Override public ShapeLibrary getShape() { return base.getShape(); }
+        @Override public ShapeRenderer getShapeRenderer() {
+            if (col == null)
+                return base.getShapeRenderer();
+            BasicShapeRenderer r = (BasicShapeRenderer) base.getShapeRenderer();
+            return new BasicShapeRenderer(col, r.getStroke(), r.getThickness());
+        }
+        @Override public float getRadius() { return rad * base.getRadius(); }
+    }
+    
+    //</editor-fold>
 }

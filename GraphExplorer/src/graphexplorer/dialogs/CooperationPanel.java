@@ -80,7 +80,7 @@ public class CooperationPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         add(jLabel2, gridBagConstraints);
 
-        jTextField1.setText("jTextField1");
+        jTextField1.setToolTipText("Type in a comma-separated list of vertices to compute the cooperation score for."); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
