@@ -5,7 +5,7 @@
 
 package graphexplorer.actions;
 
-import graphexplorer.GraphExplorerMain;
+import graphexplorer.GraphExplorerView;
 import graphexplorer.controller.GraphController;
 import graphexplorer.controller.GraphControllerMaster;
 import graphexplorer.controller.TimeGraphController;
@@ -38,7 +38,7 @@ public class ExplorerGenerateActions {
 
 // <editor-fold defaultstate="collapsed" desc="Simple Graphs">
 
-    public Action GENERATE_EMPTY = new AbstractAction("New empty graph...", GraphExplorerMain.loadIcon("new-empty18")) {
+    public Action GENERATE_EMPTY = new AbstractAction("New empty graph...", GraphExplorerView.loadIcon("new-empty18")) {
         public void actionPerformed(ActionEvent e) {
             NewSimpleGraphPanel nsgp = new NewSimpleGraphPanel();
             int n = JOptionPane.showOptionDialog(null, nsgp, "New empty graph",
@@ -51,7 +51,7 @@ public class ExplorerGenerateActions {
         }
     };
 
-    public Action GENERATE_COMPLETE = new AbstractAction("New complete graph...", GraphExplorerMain.loadIcon("new-complete18")) {
+    public Action GENERATE_COMPLETE = new AbstractAction("New complete graph...", GraphExplorerView.loadIcon("new-complete18")) {
         public void actionPerformed(ActionEvent e) {
             NewSimpleGraphPanel nsgp = new NewSimpleGraphPanel(1000);
             int n = JOptionPane.showOptionDialog(null, nsgp, "New complete graph",
@@ -64,7 +64,7 @@ public class ExplorerGenerateActions {
         }
     };
 
-    public Action GENERATE_CIRCLE = new AbstractAction("New circle graph...", GraphExplorerMain.loadIcon("new-circle18")) {
+    public Action GENERATE_CIRCLE = new AbstractAction("New circle graph...", GraphExplorerView.loadIcon("new-circle18")) {
         public void actionPerformed(ActionEvent e) {
             NewSimpleGraphPanel nsgp = new NewSimpleGraphPanel();
             int n = JOptionPane.showOptionDialog(null, nsgp, "New circle graph",
@@ -77,7 +77,7 @@ public class ExplorerGenerateActions {
         }
     };
 
-    public Action GENERATE_STAR = new AbstractAction("New star graph...", GraphExplorerMain.loadIcon("new-star18")) {
+    public Action GENERATE_STAR = new AbstractAction("New star graph...", GraphExplorerView.loadIcon("new-star18")) {
         public void actionPerformed(ActionEvent e) {
             NewSimpleGraphPanel nsgp = new NewSimpleGraphPanel();
             int n = JOptionPane.showOptionDialog(null, nsgp, "New star graph",
@@ -90,7 +90,7 @@ public class ExplorerGenerateActions {
         }
     };
 
-    public Action GENERATE_WHEEL = new AbstractAction("New wheel graph...", GraphExplorerMain.loadIcon("new-wheel18")) {
+    public Action GENERATE_WHEEL = new AbstractAction("New wheel graph...", GraphExplorerView.loadIcon("new-wheel18")) {
         public void actionPerformed(ActionEvent e) {
             NewSimpleGraphPanel nsgp = new NewSimpleGraphPanel();
             int n = JOptionPane.showOptionDialog(null, nsgp, "New wheel graph",
@@ -107,7 +107,7 @@ public class ExplorerGenerateActions {
 
 // <editor-fold defaultstate="collapsed" desc="Random Graphs">
 
-    public Action GENERATE_RANDOM = new AbstractAction("New uniform random graph...", GraphExplorerMain.loadIcon("random-uniform18")) {
+    public Action GENERATE_RANDOM = new AbstractAction("New uniform random graph...", GraphExplorerView.loadIcon("random-uniform18")) {
         public void actionPerformed(ActionEvent e) {
             NewRandomGraphPanel ngp = new NewRandomGraphPanel();
             int n = JOptionPane.showOptionDialog(null, ngp, "New uniform random graph",
@@ -120,7 +120,7 @@ public class ExplorerGenerateActions {
         }
     };
 
-    public Action GENERATE_SEQUENCE = new AbstractAction("New degree-sequence random graph...", GraphExplorerMain.loadIcon("random-sequence18")) {
+    public Action GENERATE_SEQUENCE = new AbstractAction("New degree-sequence random graph...", GraphExplorerView.loadIcon("random-sequence18")) {
         public void actionPerformed(ActionEvent e) {
             NewDegreeSequenceGraphPanel ngp = new NewDegreeSequenceGraphPanel();
             int n = JOptionPane.showOptionDialog(null, ngp, "New degree-sequence random graph",
@@ -135,7 +135,7 @@ public class ExplorerGenerateActions {
         }
     };
 
-    public Action GENERATE_WS = new AbstractAction("New Watts-Strogatz random graph...", GraphExplorerMain.loadIcon("random-watts18")) {
+    public Action GENERATE_WS = new AbstractAction("New Watts-Strogatz random graph...", GraphExplorerView.loadIcon("random-watts18")) {
         public void actionPerformed(ActionEvent e) {
             NewWSGraphPanel ngp = new NewWSGraphPanel();
             int n = JOptionPane.showOptionDialog(null, ngp, "New Watts-Strogatz random graph",
@@ -148,7 +148,7 @@ public class ExplorerGenerateActions {
         }
     };
 
-    public Action GENERATE_PREFERENTIAL = new AbstractAction("New preferential attachment graph...", GraphExplorerMain.loadIcon("random-pref18")) {
+    public Action GENERATE_PREFERENTIAL = new AbstractAction("New preferential attachment graph...", GraphExplorerView.loadIcon("random-pref18")) {
         public void actionPerformed(ActionEvent e) {
             NewPreferentialGraphPanel ngp = new NewPreferentialGraphPanel();
             int n = JOptionPane.showOptionDialog(null, ngp, "New preferential attachment graph",
@@ -169,7 +169,7 @@ public class ExplorerGenerateActions {
         }
     };
 
-    public Action GENERATE_PROXIMITY = new AbstractAction("New proximity random graph...", GraphExplorerMain.loadIcon("random-proximity18")) {
+    public Action GENERATE_PROXIMITY = new AbstractAction("New proximity random graph...", GraphExplorerView.loadIcon("random-proximity18")) {
         public void actionPerformed(ActionEvent e) {
             NewSimpleGraphPanel nsgp = new NewSimpleGraphPanel();
             int n = JOptionPane.showOptionDialog(null, nsgp, "New proximity random graph",

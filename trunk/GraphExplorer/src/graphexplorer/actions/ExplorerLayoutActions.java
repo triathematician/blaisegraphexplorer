@@ -5,7 +5,7 @@
 
 package graphexplorer.actions;
 
-import graphexplorer.GraphExplorerMain;
+import graphexplorer.GraphExplorerView;
 import graphexplorer.controller.GraphController;
 import graphexplorer.controller.TimeGraphController;
 import java.awt.event.ActionEvent;
@@ -41,7 +41,7 @@ public class ExplorerLayoutActions {
         LAYOUT_TIME_START.setEnabled(controller instanceof TimeGraphController);
     }
 
-    public Action LAYOUT_ENERGY_START = new AbstractAction("Spring layout - start", GraphExplorerMain.loadIcon("play18")) {
+    public Action LAYOUT_ENERGY_START = new AbstractAction("Spring layout - start", GraphExplorerView.loadIcon("play18")) {
         {
             putValue(SHORT_DESCRIPTION, "Set the active layout algorithm to a spring-based layout algorithm," +
                     " and begin animation.");
@@ -58,7 +58,7 @@ public class ExplorerLayoutActions {
         }
     };
 
-    public Action LAYOUT_TIME_START = new AbstractAction("Time Spring layout - start", GraphExplorerMain.loadIcon("play18")) {
+    public Action LAYOUT_TIME_START = new AbstractAction("Time Spring layout - start", GraphExplorerView.loadIcon("play18")) {
         {
             putValue(SHORT_DESCRIPTION, "Set the active layout algorithm to a time/spring-based layout algorithm," +
                     " and begin animation.");
@@ -75,7 +75,7 @@ public class ExplorerLayoutActions {
         }
     };
 
-    public Action LAYOUT_ITERATE = new AbstractAction("Iterate layout", GraphExplorerMain.loadIcon("step18")) {
+    public Action LAYOUT_ITERATE = new AbstractAction("Iterate layout", GraphExplorerView.loadIcon("step18")) {
         {
             putValue(SHORT_DESCRIPTION, "Runs a single iteration of the currently active iterative layout algorithm.");
             putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.ALT_DOWN_MASK));
@@ -88,7 +88,7 @@ public class ExplorerLayoutActions {
         }
     };
 
-    public Action LAYOUT_STOP = new AbstractAction("Stop layout animation", GraphExplorerMain.loadIcon("stop18")) {
+    public Action LAYOUT_STOP = new AbstractAction("Stop layout animation", GraphExplorerView.loadIcon("stop18")) {
         {
             putValue(SHORT_DESCRIPTION, "Stop animation of the currently active iterative layout algorithm.");
             putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.ALT_DOWN_MASK));
