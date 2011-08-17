@@ -1,7 +1,3 @@
-<!--
-To change this template, choose Tools | Templates
-and open the template in the editor.
--->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
   <head>
@@ -10,66 +6,136 @@ and open the template in the editor.
   </head>
   <body>
       <h1>Help for GraphExplorer</h1>
-
-      <h2>Graphical User Interface</h2>
-
-      <h2>Generating New Graphs</h2>
       <p>
-      Currently, the application has support for generating <b>empty</b>, <b>circle</b>,
-      <b>star</b>, <b>wheel</b>, and <b>complete</b> graphs.
-      In addition, a <img src="./random-uniform24.png"/><b>uniform random graph</b> may be generated (directed or undirected) using either
-      (i) a number of nodes and probability of edge,
-      or (ii) a number of nodes and a number of edges.
-      A <img src="./random-pref24.png"/><b>preferential attachment graph</b> may be generated, using a small initial uniform      random graph as a seed, in which each vertex is added with either
-      (i) a fixed number of connections,
-      or (ii) a variable number of connections (with a user-specified probability distribution).
+          This file contains limited help for GraphExplorer. An alternate source
+          for help is the project wiki at
+          <a href="http://blaisegraphexplorer.googlecode.com/">http://blaisegraphexplorer.googlecode.com/</a>.
+      </p>
+      <p>
+          GraphExplorer is still under active development, and you may have some ideas about additional
+          things you would like it to do, or you may experience some bugs. Whether it's an additional
+          capability or the software breaks, we'd appreciate feedback. Please visit
+          <a href="http://blaisegraphexplorer.googlecode.com/">http://blaisegraphexplorer.googlecode.com/</a>
+          to submit feedback, or email the project owner at <i>triathematician@gmail.com</i>, subject line "Graph Explorer".
+      </p>
+      
+      <h2>Getting Started</h2>
+      <p>
+          There are two ways to get started: either <i>generate</i> a new graph, or <i>load</i> an existing graph.
+          Once a graph is loaded, GraphExplorer can automatically layout the graph, or compute various metrics on the graph.
       </p>
 
-      <h2>File Types</h2>
-      Currently supported file types include:
-      <ul>
-          <li><b>Edge list</b> format: each line consists of a pair of integers indicating the edge between two nodes.</li>
-          <li><b>Pajek</b> format (.net): vertex declarations (with positions), and a variety of input formats for edges, including edge lists and adjacency matrices.</li>
-          <li><b>Extended pajek</b> format (.netx): pajek format with additional custom file information
-          <li><b>UCINet</b> format (.dat): supports more general data structures
-      </ul>
-      Note that only part of these formats is currently supported! In the future, we hope to add support
-      for both <b>GraphML</b> and <b>DyNetML</b> formats.
+      <h3>Generating New Graphs</h3>
+      <p>
+          GraphExplorer can generate several kinds of fixed and random graphs. 
+          Currently supported are <b>empty</b>, <b>circle</b>, <b>star</b>, <b>wheel</b>, and <b>complete</b> graphs.
+          Each of these may be generated with arbitrary numbers of nodes, as directed or undirected graphs.
+      </p>
+      <p>
+          Currently, five types of random graphs may be generated. Most of these have additional parameters that may be adjusted:
+          <ul>
+              <li><img src="./random-uniform24.png"/> <b>Uniform (Erdos-Renyi) random graph</b>: Allows either a fixed number of edges or a fixed edge probability</li>
+              <li><img src="./random-degree24.png"/> <b>Degree sequence random graph</b>: Edges are randomly generated while ensuring a fixed degree sequence in the resulting graph</li>
+              <li><img src="./random-watts24.png"/> <b>Watts-Strogatz random graph</b>: Graph is obtained starting with a lattice graph after rewiring edges with a fixed probability</li>
+              <li><img src="./random-pref24.png"/> <b>Preferential attachment graph</b>: Graph is obtained from a starting graph after adding additional nodes using the preferential attachment algorithm.
+                  Allows adding either a fixed number of edges per step, or a randomly determined number. The resulting graph may be either static or longitudinal, in which
+                  case a slider will be generated to show how the graph is constructed over time.</li>
+              <li><img src="./random-proximity24.png"/> <b>Proximity random graph</b>: nodes are randomly placed within a box, and connected if they are within a certain distance
+                  of each other. This feature is experimental, and additional parameters will be added in later versions.</li>
+          </ul>
+      </p>
 
-      <h2>Visualization Features</h2>
-      Many visual settings may be adjusted using the property panel at left.
+      <h3>Loading Existing Graphs</h3>
+      <p>
+          GraphExplorer supports several standard graph file types (although it does not support every option within these types).
+          This allows the user to load existing graphs, or to edit a text file to describe the graph.
+          Currently supported file types include:
+          <ul>
+              <li><b>Edge list</b> format: each line consists of a pair of integers indicating the edge between two nodes.</li>
+              <li><b>Pajek</b> format (.net): vertex declarations (with positions), and a variety of input formats for edges, including edge lists and adjacency matrices.</li>
+              <li><b>Extended pajek</b> format (.net,.netx,.netl): pajek format with additional custom file information
+              <li><b>UCINet</b> format (.dat): supports more general data structures
+              <li><b>GraphML</b> format (.graphml): some limited support currently
+          </ul>
+          The Pajek format is the default for GraphExplorer, and has the most widely supported set of options.
+          In the future, we hope to add support for additional formats.
+      </p>
+      <p>
+          Once a file is loaded, the <i>File Editor</i> under the <i>View</i> menu shows the text content of the file.
+          A capability currently planned for future versions is the ability to edit the graph directly from that view.
+      </p>
+      <p>
+          For more information about these file types, including brief descriptions, see the wiki page at
+          <a href="http://blaisegraphexplorer.googlecode.com/">http://blaisegraphexplorer.googlecode.com/</a>.
+      </p>
+      
+      <h2>Graph Layout</h2>
+      <p>
+          GraphExplorer contains a number of static layout options, as well as the ability to animate an iterative layout
+          as it is being applied. The static layouts are all accessible as buttons from the toolbar:
+          <ul>
+              <li><img src="./layout-circle24.png"/> <b>Circular Layout:</b> Places nodes around a circle.</li>
+              <li><img src="./layout-random24.png"/> <b>Random Layout:</b> Places nodes at random within a box.</li>
+              <li><img src="./layout-spring24.png"/> <b>Static Spring Layout:</b> Uses simulated physics to generate ideal locations for nodes and edges.
+                  This layout gives the best results, but may take some time to converge for large graphs.
+                  The algorithm is described further below.</li>
+          </ul>
+      </p>
+      <p>
+         The spring layout may also be animated to let the user watch the algorithm working over time.
+         At each step, the algorithm determines a number of forces on the nodes, and moves the nodes appropriately.
+         The forces are:
+          <ol>
+              <li>a repulsive force between each pair of vertices</li>
+              <li>an attractive force between each pair of connected vertices</li>
+              <li>a global force ensuring components stay close to the middle of the screen</li>
+          </ol>
+          Parameters for this layout are shown in the property panel on the lefthand side of the window.
+      </p>
+      <p>
+          There is an additional <i>Time Spring Layout</i> option for longitudinal graphs, accessible under
+          the Layout menu. This generates a static layout for the slices in a dynamic graph. This is an
+          experimental feature and has not been fully tested.
+      </p>
 
-      <h3>Longitudinal Graphs</h3>
-      This application supports longitudinal graphs, which change over time. A sample longitudinal graph
-      may be created using the "preferential attachment" random graph generator, and selecting the
-      longitudinal option. Special features included with the longitudinal view include:
-      <ol>
-          <li>A slider below the main graph that displays the time frame for the longitudinal graph, which
-            may be adjusted dynamically. If a dynamic layout is active, the layout automatically reconfigures
-            for the new graph.</li>
-          <li>A chart displaying the value of the selected metric over time. For this to be active, one or
-            more nodes must be highlighted: use the <code>Layout -> Highlight Nodes</code> to select these nodes.</li>
-      </ol>
+      
+      <h2>Visualization and Appearance Features</h2>
+      <p>
+        Basic visual settings may be adjusted using the property panel at left.
+        These settings include background color, node size/shape/color, edge color/thickness, and label style.
+        There is also a checkbox to turn labels on and off (under the "Labels" box).
+      </p>
+      <p>
+          Still images of the current view may be saved in a variety of common formats, and .mov files of
+          longitudinal graphs may also be exported.
+      </p>
 
-      <h2>Layout Methods</h2>
-      Supported layouts are summarized here.
-
-      <h3><img src="./layout-circle24.png"/>Circular Layout</h3>
-      Places nodes around a circle.
-      <h3><img src="./layout-random24.png"/>Random Layout</h3>
-      Places nodes at random within a box.
-      <h3><img src="./layout-spring24.png"/>Spring layout</h3>
-      Uses simulated physics to generate ideal locations for nodes and edges. Forces include
-      (i) a repulsive force between each pair of vertices,
-      (ii) an attractive force between each pair of connected vertices, and
-      (iii) a global force ensuring components stay close to the middle of the screen.
-
+      
       <h2>Metrics</h2>
-      Currently, one metric at a time may be displayed along with the graph. The metric displays
-      in several ways:
-      (i) the node sizes on the main plot are adjusted to have areas proportional
-      to that node's metric value,
-      (ii) the actual metric values are displayed on the main graph table, and
-      (iii) a chart & table of the distribution of metric values is shown at bottom.
+      <p>
+          Currently, one metric at a time may be displayed along with the graph.
+          The metric displays in several ways:
+          <ul>
+              <li>The node sizes on the main plot are adjusted to have areas proportional to that node's metric value.</li>
+              <li>The actual metric values are displayed on the main graph table.</li>
+              <li>A chart & table of the distribution of metric values is shown at bottom.</li>
+          </ul>
+          We do not currently have concise descriptions of these metrics available.
+      </p>
+      
+
+      <h2>Longitudinal Graphs</h2>
+      <p>
+          This application supports longitudinal graphs, which change over time. A sample longitudinal graph
+          may be created using the "preferential attachment" random graph generator, and selecting the
+          longitudinal option. Special features included with the longitudinal view include:
+          <ol>
+              <li>A slider below the main graph that displays the time frame for the longitudinal graph, which
+                may be adjusted dynamically. If a dynamic layout is active, the layout automatically reconfigures
+                for the new graph.</li>
+              <li>A chart displaying the value of the selected metric over time. For this to be active, one or
+                more nodes must be highlighted: use the <code>Layout -> Highlight Nodes</code> to select these nodes.</li>
+          </ol>
+      </p>
   </body>
 </html>

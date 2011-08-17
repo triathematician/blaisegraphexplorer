@@ -1,31 +1,38 @@
 /*
- * GraphExplorerMain.java
- * Created on May 14, 2010, 10:10:30 AM
+ * TestSAFView.java
  */
 
 package graphexplorer;
 
 import data.propertysheet.BeanEditorSupport;
-import graphexplorer.controller.GraphControllerMaster;
-import graphexplorer.controller.GraphController;
-import graphexplorer.views.TimeMetricPlot;
-import graphexplorer.actions.ExplorerLayoutActions;
-import graphexplorer.actions.ExplorerGenerateActions;
-import graphexplorer.io.ExplorerIOActions;
 import data.propertysheet.PropertySheet;
-import data.propertysheet.editor.EditorRegistration;
+import graphexplorer.actions.ExplorerGenerateActions;
+import graphexplorer.actions.ExplorerLayoutActions;
 import graphexplorer.actions.ExplorerStatActions;
 import graphexplorer.actions.ExplorerStatActions.GlobalStatEnum;
 import graphexplorer.actions.ExplorerStatActions.StatEnum;
+import graphexplorer.controller.GraphController;
+import graphexplorer.controller.GraphControllerMaster;
 import graphexplorer.controller.GraphFilterController;
 import graphexplorer.controller.GraphStatController;
 import graphexplorer.controller.TimeGraphController;
+import graphexplorer.io.ExplorerIOActions;
 import graphexplorer.views.GraphListModel;
+import graphexplorer.views.TimeMetricPlot;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.Point;
+import org.bm.blaise.graphics.renderer.Anchor;
+import org.bm.blaise.graphics.renderer.StringRenderer;
+import org.jdesktop.application.Action;
+import org.jdesktop.application.ResourceMap;
+import org.jdesktop.application.SingleFrameApplication;
+import org.jdesktop.application.FrameView;
+import org.jdesktop.application.TaskMonitor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
@@ -43,93 +50,45 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractButton;
+import javax.swing.Timer;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JDialog;
 import javax.swing.JEditorPane;
+import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
-import javax.swing.UIManager;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import org.bm.blaise.graphics.renderer.BasicStringRenderer;
 import org.bm.blaise.scio.graph.layout.IterativeGraphLayout;
 import org.bm.blaise.scio.graph.layout.StaticGraphLayout;
 import org.bm.blaise.scio.graph.layout.StaticSpringLayout;
 import org.bm.blaise.specto.plane.PlanePlotComponent;
-import org.bm.blaise.specto.plane.graph.*;
+import org.bm.blaise.specto.plane.graph.GraphComponent;
+import org.bm.blaise.specto.plane.graph.GraphManager;
+import org.bm.blaise.specto.plane.graph.PlaneGraphAdapter;
 import org.bm.blaise.specto.plane.graph.time.TimeGraphComponent;
-import org.jdesktop.application.Action;
-import org.jdesktop.application.Application;
-import org.jdesktop.application.ApplicationActionMap;
-import org.jdesktop.application.ApplicationContext;
-import org.jdesktop.application.ResourceMap;
-import org.jdesktop.application.SingleFrameApplication;
 import org.jdesktop.application.Task;
 
 /**
- *
- * @author Elisha Peterson
+ * The application's main frame.
  */
-public class GraphExplorerMain extends javax.swing.JFrame
-        implements GraphExplorerInterface,
-            PropertyChangeListener {
-    
-
-    // <editor-fold defaultstate="collapsed" desc="APPLICATION CODE">
-    //
-    // APPLICATION CODE
-    //
-
-    /**
-    * @param args the command line arguments
-    */
-    public static void main(String args[]) {
-        Application.launch(GraphExplorerMain.App.class, args);
-    }
-
-    /** The application */
-    Application app;
-    /** Corresponds to the App inner class's rsc file */
-    ResourceMap rsc;
-
-    /** Class that contains the application context. */
-    public static class App extends SingleFrameApplication {
-        /** The main visible frame */
-        private GraphExplorerMain mainFrame;
-        /** The context class */
-        private ApplicationContext ctxt;
-        /** Resources for context */
-        private ResourceMap rsc;
-        /** Actions for context */
-        private ApplicationActionMap acts;
-
-        @Override
-        protected void initialize(String[] args) {
-            ctxt = getContext();
-            rsc = ctxt.getResourceMap(GraphExplorerMain.class);
-        }
-        @Override
-        protected void startup() {
-            mainFrame = new GraphExplorerMain();
-            acts = ctxt.getActionMap(mainFrame);
-            mainFrame.rsc = rsc;
-            mainFrame.app = this;
-            show(mainFrame);
-        }
-    }
+public class GraphExplorerView extends FrameView implements GraphExplorerInterface, PropertyChangeListener {
 
     /** Loads an image icon for the specified relative path */
     @Deprecated
     public static ImageIcon loadIcon(String path) {
-        URL url = GraphExplorerMain.class.getResource("/graphexplorer/resources/"+path+".png");
+        URL url = GraphExplorerView.class.getResource("/graphexplorer/resources/"+path+".png");
         if (url == null) {
             System.out.println("Unable to load icon /graphexplorer/resources/" + path + ".png");
             return null;
         }
         return new ImageIcon(url);
     }
-    // </editor-fold>
 
 
     // <editor-fold defaultstate="collapsed" desc="FILE/HELP MENU ACTIONS">
@@ -145,7 +104,9 @@ public class GraphExplorerMain extends javax.swing.JFrame
 
     @Action
     public void showAbout() {
-        JOptionPane.showMessageDialog(this, rsc.getString("aboutText"));
+        ResourceMap rsc = getResourceMap();
+        JOptionPane.showMessageDialog(getFrame(),
+                rsc.getString("aboutText"), rsc.getString("aboutTitle"), JOptionPane.INFORMATION_MESSAGE);
     }
 
     @Action
@@ -154,11 +115,12 @@ public class GraphExplorerMain extends javax.swing.JFrame
         editorPane.setEditable(false);
         java.net.URL helpURL = null;
         try {
+            ResourceMap rsc = getResourceMap();
             String filename = rsc.getResourcesDir() + rsc.getString("helpFile");
             helpURL = rsc.getClassLoader().getResource(filename);
             editorPane.setPage(helpURL);
         } catch (Exception ex) {
-            Logger.getLogger(GraphExplorerMain.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(GraphExplorerView.class.getName()).log(Level.SEVERE, null, ex);
             System.err.println("Attempted to read a bad URL: " + helpURL);
             return;
         }
@@ -169,6 +131,7 @@ public class GraphExplorerMain extends javax.swing.JFrame
                         JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         editorScrollPane.setPreferredSize(new Dimension(480, 640));
 
+        ResourceMap rsc = getResourceMap();
         JOptionPane.showMessageDialog(null,
                 editorScrollPane,
                 rsc.getString("helpFrameTitle"), JOptionPane.QUESTION_MESSAGE);
@@ -188,7 +151,7 @@ public class GraphExplorerMain extends javax.swing.JFrame
     public void showEditorDialog() {
         if (controller() != null) {
             if (fileEditor == null)
-                fileEditor = new FileEditorDialog(this);
+                fileEditor = new FileEditorDialog(getFrame());
             else
                 fileEditor.initTextArea();
             fileEditor.setVisible(true);
@@ -197,12 +160,12 @@ public class GraphExplorerMain extends javax.swing.JFrame
     
     @Action
     public void saveEditorChanges() {
-        JOptionPane.showMessageDialog(this, "Feature not yet implemented.");
+        JOptionPane.showMessageDialog(getFrame(), "Feature not yet implemented.");
     }
     
     @Action
     public void applyEditorChanges() {
-        JOptionPane.showMessageDialog(this, "Feature not yet implemented.");
+        JOptionPane.showMessageDialog(getFrame(), "Feature not yet implemented.");
     }
     
     @Action(enabledProperty = "graphActive")
@@ -243,7 +206,7 @@ public class GraphExplorerMain extends javax.swing.JFrame
             implements ActionListener {
         StaticGraphLayout layout;
         public BackgroundLayoutTask(StaticGraphLayout layout) { 
-            super(app); 
+            super(GraphExplorerApp.getApplication()); 
             this.layout = layout; 
             setTitle("Computing Graph Layout...");
             setDescription("Layout is Executing");
@@ -307,9 +270,11 @@ public class GraphExplorerMain extends javax.swing.JFrame
         
         GraphListModel glm = new GraphListModel(gc);
         JList jl = new JList(glm);
-        jl.setMaximumSize(new Dimension(800,600));
         jl.setLayoutOrientation(JList.VERTICAL_WRAP);
-        int result = JOptionPane.showConfirmDialog(null, new JScrollPane(jl), "Select 1 or more nodes",
+        jl.setVisibleRowCount(20);
+        JScrollPane sp = new JScrollPane(jl);
+        sp.getViewport().setPreferredSize(new Dimension(600,jl.getPreferredSize().height));
+        int result = JOptionPane.showConfirmDialog(null, sp, "Select 1 or more nodes",
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result == JOptionPane.OK_OPTION) {
             int[] selected = jl.getSelectedIndices();
@@ -350,11 +315,9 @@ public class GraphExplorerMain extends javax.swing.JFrame
     /** Graph-generation actions */
     ExplorerGenerateActions actions_gen;
 
-    /** Creates new form GraphExplorerMain */
-    public GraphExplorerMain() {
-        try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); } catch (Exception e) { }
-        EditorRegistration.registerEditors();
-
+    public GraphExplorerView(SingleFrameApplication app) {
+        super(app);
+        
         master = new GraphControllerMaster();
         master.addPropertyChangeListener(this);
 
@@ -370,6 +333,60 @@ public class GraphExplorerMain extends javax.swing.JFrame
         
         initMetricMenus();
         longMetricCP = new TimeMetricPlot();
+        
+        // status bar initialization - message timeout, idle icon and busy animation, etc
+        ResourceMap resourceMap = getResourceMap();
+        int messageTimeout = resourceMap.getInteger("StatusBar.messageTimeout");
+        messageTimer = new Timer(messageTimeout, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                statusMessageLabel.setText("");
+            }
+        });
+        messageTimer.setRepeats(false);
+        int busyAnimationRate = resourceMap.getInteger("StatusBar.busyAnimationRate");
+        for (int i = 0; i < busyIcons.length; i++) {
+            busyIcons[i] = resourceMap.getIcon("StatusBar.busyIcons[" + i + "]");
+        }
+        busyIconTimer = new Timer(busyAnimationRate, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                busyIconIndex = (busyIconIndex + 1) % busyIcons.length;
+                statusAnimationLabel.setIcon(busyIcons[busyIconIndex]);
+            }
+        });
+        idleIcon = resourceMap.getIcon("StatusBar.idleIcon");
+        statusAnimationLabel.setIcon(idleIcon);
+        progressBar.setVisible(false);
+
+        // connecting action tasks to status bar via TaskMonitor
+        TaskMonitor taskMonitor = new TaskMonitor(getApplication().getContext());
+        taskMonitor.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                String propertyName = evt.getPropertyName();
+                if ("started".equals(propertyName)) {
+                    if (!busyIconTimer.isRunning()) {
+                        statusAnimationLabel.setIcon(busyIcons[0]);
+                        busyIconIndex = 0;
+                        busyIconTimer.start();
+                    }
+                    progressBar.setVisible(true);
+                    progressBar.setIndeterminate(true);
+                } else if ("done".equals(propertyName)) {
+                    busyIconTimer.stop();
+                    statusAnimationLabel.setIcon(idleIcon);
+                    progressBar.setVisible(false);
+                    progressBar.setValue(0);
+                } else if ("message".equals(propertyName)) {
+                    String text = (String)(evt.getNewValue());
+                    statusMessageLabel.setText((text == null) ? "" : text);
+                    messageTimer.restart();
+                } else if ("progress".equals(propertyName)) {
+                    int value = (Integer)(evt.getNewValue());
+                    progressBar.setVisible(true);
+                    progressBar.setIndeterminate(false);
+                    progressBar.setValue(value);
+                }
+            }
+        });
     }
 
     private void initActions() {
@@ -397,12 +414,6 @@ public class GraphExplorerMain extends javax.swing.JFrame
             globalMetricM.add(new JMenuItem(actions_stat.actionOf(se)));
     }
 
-
-    // <editor-fold desc="GENERATED CODE">
-    //
-    // GENERATED CODE
-    //
-
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -412,43 +423,7 @@ public class GraphExplorerMain extends javax.swing.JFrame
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        labelPS = new data.propertysheet.PropertySheet();
-        edgePS = new data.propertysheet.PropertySheet();
-        nodePS = new data.propertysheet.PropertySheet();
-        layoutPS = new data.propertysheet.PropertySheet();
-        newPM = new javax.swing.JPopupMenu();
-        emptyMI1 = new javax.swing.JMenuItem();
-        circleMI1 = new javax.swing.JMenuItem();
-        starMI1 = new javax.swing.JMenuItem();
-        wheelMI1 = new javax.swing.JMenuItem();
-        completeMI1 = new javax.swing.JMenuItem();
-        jSeparator5 = new javax.swing.JPopupMenu.Separator();
-        uniform1MI1 = new javax.swing.JMenuItem();
-        sequenceMI1 = new javax.swing.JMenuItem();
-        wattsMI1 = new javax.swing.JMenuItem();
-        preferentialMI1 = new javax.swing.JMenuItem();
-        proximityMI1 = new javax.swing.JMenuItem();
-        metricMenuBG = new javax.swing.ButtonGroup();
-        toolbar = new javax.swing.JToolBar();
-        newTBB = new javax.swing.JButton();
-        loadTBB = new javax.swing.JButton();
-        saveTBB = new javax.swing.JButton();
-        jSeparator2 = new javax.swing.JToolBar.Separator();
-        jButton1 = new javax.swing.JButton();
-        jSeparator10 = new javax.swing.JToolBar.Separator();
-        layoutCircleTBB = new javax.swing.JButton();
-        layoutRandomTBB = new javax.swing.JButton();
-        layoutStaticTBB = new javax.swing.JButton();
-        layoutEnergyTBB = new javax.swing.JToggleButton();
-        jSeparator3 = new javax.swing.JToolBar.Separator();
-        jPanel1 = new javax.swing.JPanel();
-        metricBar1 = new graphexplorer.views.GraphMetricBar();
-        jSeparator9 = new javax.swing.JToolBar.Separator();
-        filterBar = new graphexplorer.views.GraphFilterBar();
-        jPanel2 = new javax.swing.JPanel();
-        jSeparator8 = new javax.swing.JToolBar.Separator();
-        statusB = new javax.swing.JPanel();
-        statusL = new javax.swing.JLabel();
+        mainPanel = new javax.swing.JPanel();
         mainSP2 = new javax.swing.JSplitPane();
         mainSP = new javax.swing.JSplitPane();
         graphTP = new javax.swing.JTabbedPane();
@@ -468,6 +443,11 @@ public class GraphExplorerMain extends javax.swing.JFrame
         boxP3 = new javax.swing.JPanel();
         outputSP = new javax.swing.JScrollPane();
         outputTP = new javax.swing.JTextPane();
+        statusPanel = new javax.swing.JPanel();
+        javax.swing.JSeparator statusPanelSeparator = new javax.swing.JSeparator();
+        statusMessageLabel = new javax.swing.JLabel();
+        statusAnimationLabel = new javax.swing.JLabel();
+        progressBar = new javax.swing.JProgressBar();
         menu = new javax.swing.JMenuBar();
         fileM = new javax.swing.JMenu();
         newM = new javax.swing.JMenu();
@@ -519,50 +499,478 @@ public class GraphExplorerMain extends javax.swing.JFrame
         helpM = new javax.swing.JMenu();
         aboutMI = new javax.swing.JMenuItem();
         contentMI = new javax.swing.JMenuItem();
+        metricMenuBG = new javax.swing.ButtonGroup();
+        newPM = new javax.swing.JPopupMenu();
+        emptyMI1 = new javax.swing.JMenuItem();
+        circleMI1 = new javax.swing.JMenuItem();
+        starMI1 = new javax.swing.JMenuItem();
+        wheelMI1 = new javax.swing.JMenuItem();
+        completeMI1 = new javax.swing.JMenuItem();
+        jSeparator5 = new javax.swing.JPopupMenu.Separator();
+        uniform1MI1 = new javax.swing.JMenuItem();
+        sequenceMI1 = new javax.swing.JMenuItem();
+        wattsMI1 = new javax.swing.JMenuItem();
+        preferentialMI1 = new javax.swing.JMenuItem();
+        proximityMI1 = new javax.swing.JMenuItem();
+        labelPS = new data.propertysheet.PropertySheet();
+        edgePS = new data.propertysheet.PropertySheet();
+        nodePS = new data.propertysheet.PropertySheet();
+        layoutPS = new data.propertysheet.PropertySheet();
+        toolbar = new javax.swing.JToolBar();
+        newTBB = new javax.swing.JButton();
+        loadTBB = new javax.swing.JButton();
+        saveTBB = new javax.swing.JButton();
+        jSeparator2 = new javax.swing.JToolBar.Separator();
+        jButton1 = new javax.swing.JButton();
+        jSeparator10 = new javax.swing.JToolBar.Separator();
+        layoutCircleTBB = new javax.swing.JButton();
+        layoutRandomTBB = new javax.swing.JButton();
+        layoutStaticTBB = new javax.swing.JButton();
+        layoutEnergyTBB = new javax.swing.JToggleButton();
+        jSeparator3 = new javax.swing.JToolBar.Separator();
+        jPanel1 = new javax.swing.JPanel();
+        metricBar1 = new graphexplorer.views.GraphMetricBar();
+        jSeparator9 = new javax.swing.JToolBar.Separator();
+        filterBar = new graphexplorer.views.GraphFilterBar();
+        jPanel2 = new javax.swing.JPanel();
+        jSeparator8 = new javax.swing.JToolBar.Separator();
+
+        mainPanel.setName("mainPanel"); // NOI18N
+        mainPanel.setLayout(new java.awt.BorderLayout());
+
+        mainSP2.setDividerSize(8);
+        mainSP2.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+        mainSP2.setResizeWeight(0.8);
+        mainSP2.setName("mainSP2"); // NOI18N
+        mainSP2.setOneTouchExpandable(true);
+
+        mainSP.setDividerSize(8);
+        mainSP.setName("mainSP"); // NOI18N
+        mainSP.setOneTouchExpandable(true);
+
+        graphTP.setName("graphTP"); // NOI18N
+        graphTP.setPreferredSize(new java.awt.Dimension(800, 600));
+        graphTP.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                graphTPStateChanged(evt);
+            }
+        });
+        mainSP.setRightComponent(graphTP);
+
+        propertySP.setName("propertySP"); // NOI18N
+        propertySP.setPreferredSize(new java.awt.Dimension(200, 400));
+
+        propertyRP.setName("propertyRP"); // NOI18N
+        propertySP.setViewportView(propertyRP);
+
+        mainSP.setLeftComponent(propertySP);
+
+        mainSP2.setTopComponent(mainSP);
+
+        boxPanel.setName("boxPanel"); // NOI18N
+        boxPanel.setPreferredSize(new java.awt.Dimension(800, 250));
+        boxPanel.setLayout(new javax.swing.BoxLayout(boxPanel, javax.swing.BoxLayout.LINE_AXIS));
+
+        boxP1.setName("boxP1"); // NOI18N
+        boxP1.setLayout(new java.awt.BorderLayout());
+
+        mainTableTB.setFloatable(false);
+        mainTableTB.setRollover(true);
+        mainTableTB.setName("mainTableTB"); // NOI18N
+
+        metricBar2.setName("metricBar2"); // NOI18N
+        mainTableTB.add(metricBar2);
+
+        boxP1.add(mainTableTB, java.awt.BorderLayout.PAGE_START);
+
+        mainTableSP.setName("mainTableSP"); // NOI18N
+
+        mainTable.setName("mainTable"); // NOI18N
+        mainTableSP.setViewportView(mainTable);
+
+        boxP1.add(mainTableSP, java.awt.BorderLayout.CENTER);
+
+        boxPanel.add(boxP1);
+
+        boxP2.setName("boxP2"); // NOI18N
+        boxP2.setLayout(new java.awt.BorderLayout());
+
+        boxTP2.setTabLayoutPolicy(javax.swing.JTabbedPane.SCROLL_TAB_LAYOUT);
+        boxTP2.setName("boxTP2"); // NOI18N
+
+        metricPlot1.setName("metricPlot1"); // NOI18N
+        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance().getContext().getResourceMap(GraphExplorerView.class);
+        boxTP2.addTab(resourceMap.getString("metricPlot1.TabConstraints.tabTitle"), metricPlot1); // NOI18N
+
+        distributionTableSP.setName("distributionTableSP"); // NOI18N
+
+        distributionTable.setModel(metricPlot1.getTableModel());
+        distributionTable.setName("distributionTable"); // NOI18N
+        distributionTableSP.setViewportView(distributionTable);
+
+        boxTP2.addTab(resourceMap.getString("distributionTableSP.TabConstraints.tabTitle"), distributionTableSP); // NOI18N
+
+        boxP2.add(boxTP2, java.awt.BorderLayout.CENTER);
+
+        boxPanel.add(boxP2);
+
+        boxP3.setName("boxP3"); // NOI18N
+        boxP3.setLayout(new java.awt.BorderLayout());
+
+        outputSP.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        outputSP.setName("outputSP"); // NOI18N
+
+        outputTP.setBackground(resourceMap.getColor("outputTP.background")); // NOI18N
+        outputTP.setForeground(resourceMap.getColor("outputTP.foreground")); // NOI18N
+        outputTP.setText(resourceMap.getString("outputTP.text")); // NOI18N
+        outputTP.setName("outputTP"); // NOI18N
+        outputTP.setPreferredSize(new java.awt.Dimension(500, 200));
+        outputSP.setViewportView(outputTP);
+
+        boxP3.add(outputSP, java.awt.BorderLayout.CENTER);
+
+        boxPanel.add(boxP3);
+
+        mainSP2.setBottomComponent(boxPanel);
+
+        mainPanel.add(mainSP2, java.awt.BorderLayout.CENTER);
+
+        statusPanel.setName("statusPanel"); // NOI18N
+
+        statusPanelSeparator.setName("statusPanelSeparator"); // NOI18N
+
+        statusMessageLabel.setName("statusMessageLabel"); // NOI18N
+
+        statusAnimationLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        statusAnimationLabel.setName("statusAnimationLabel"); // NOI18N
+
+        progressBar.setName("progressBar"); // NOI18N
+
+        javax.swing.GroupLayout statusPanelLayout = new javax.swing.GroupLayout(statusPanel);
+        statusPanel.setLayout(statusPanelLayout);
+        statusPanelLayout.setHorizontalGroup(
+            statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 1058, Short.MAX_VALUE)
+            .addGroup(statusPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(statusMessageLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 883, Short.MAX_VALUE)
+                .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(statusAnimationLabel)
+                .addContainerGap())
+        );
+        statusPanelLayout.setVerticalGroup(
+            statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(statusPanelLayout.createSequentialGroup()
+                .addComponent(statusPanelSeparator, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(statusMessageLabel)
+                    .addComponent(statusAnimationLabel)
+                    .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(3, 3, 3))
+        );
+
+        menu.setName("menu"); // NOI18N
+
+        fileM.setText(resourceMap.getString("fileM.text")); // NOI18N
+        fileM.setName("fileM"); // NOI18N
+
+        newM.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/new-graph18.png"))); // NOI18N
+        newM.setText(resourceMap.getString("newM.text")); // NOI18N
+        newM.setName("newM"); // NOI18N
+
+        emptyMI.setAction(actions_gen.GENERATE_EMPTY);
+        emptyMI.setText(resourceMap.getString("emptyMI.text")); // NOI18N
+        emptyMI.setName("emptyMI"); // NOI18N
+        newM.add(emptyMI);
+
+        circleMI.setAction(actions_gen.GENERATE_CIRCLE);
+        circleMI.setText(resourceMap.getString("circleMI.text")); // NOI18N
+        circleMI.setName("circleMI"); // NOI18N
+        newM.add(circleMI);
+
+        starMI.setAction(actions_gen.GENERATE_STAR);
+        starMI.setText(resourceMap.getString("starMI.text")); // NOI18N
+        starMI.setName("starMI"); // NOI18N
+        newM.add(starMI);
+
+        wheelMI.setAction(actions_gen.GENERATE_WHEEL);
+        wheelMI.setText(resourceMap.getString("wheelMI.text")); // NOI18N
+        wheelMI.setName("wheelMI"); // NOI18N
+        newM.add(wheelMI);
+
+        completeMI.setAction(actions_gen.GENERATE_COMPLETE);
+        completeMI.setText(resourceMap.getString("completeMI.text")); // NOI18N
+        completeMI.setName("completeMI"); // NOI18N
+        newM.add(completeMI);
+
+        jSeparator1.setName("jSeparator1"); // NOI18N
+        newM.add(jSeparator1);
+
+        uniform1MI.setAction(actions_gen.GENERATE_RANDOM);
+        uniform1MI.setText(resourceMap.getString("uniform1MI.text")); // NOI18N
+        uniform1MI.setName("uniform1MI"); // NOI18N
+        newM.add(uniform1MI);
+
+        sequenceMI.setAction(actions_gen.GENERATE_SEQUENCE);
+        sequenceMI.setText(resourceMap.getString("sequenceMI.text")); // NOI18N
+        sequenceMI.setName("sequenceMI"); // NOI18N
+        newM.add(sequenceMI);
+
+        wattsMI.setAction(actions_gen.GENERATE_WS);
+        wattsMI.setText(resourceMap.getString("wattsMI.text")); // NOI18N
+        wattsMI.setName("wattsMI"); // NOI18N
+        newM.add(wattsMI);
+
+        preferentialMI.setAction(actions_gen.GENERATE_PREFERENTIAL);
+        preferentialMI.setText(resourceMap.getString("preferentialMI.text")); // NOI18N
+        preferentialMI.setName("preferentialMI"); // NOI18N
+        newM.add(preferentialMI);
+
+        proximityMI.setAction(actions_gen.GENERATE_PROXIMITY);
+        proximityMI.setName("proximityMI"); // NOI18N
+        newM.add(proximityMI);
+
+        fileM.add(newM);
+
+        loadMI.setAction(actions_io.LOAD_ACTION);
+        loadMI.setText(resourceMap.getString("loadMI.text")); // NOI18N
+        loadMI.setName("loadMI"); // NOI18N
+        fileM.add(loadMI);
+
+        saveMI.setAction(actions_io.SAVE_ACTION);
+        saveMI.setText(resourceMap.getString("saveMI.text")); // NOI18N
+        saveMI.setName("saveMI"); // NOI18N
+        fileM.add(saveMI);
+
+        saveMI1.setAction(actions_io.SAVE_AS_ACTION);
+        saveMI1.setText(resourceMap.getString("saveMI1.text")); // NOI18N
+        saveMI1.setName("saveMI1"); // NOI18N
+        fileM.add(saveMI1);
+
+        closeMI.setAction(actions_io.CLOSE_ACTION);
+        closeMI.setText(resourceMap.getString("closeMI.text")); // NOI18N
+        closeMI.setName("closeMI"); // NOI18N
+        fileM.add(closeMI);
+
+        jSeparator7.setName("jSeparator7"); // NOI18N
+        fileM.add(jSeparator7);
+
+        exportImageM.setText(resourceMap.getString("exportImageM.text")); // NOI18N
+        exportImageM.setEnabled(false);
+        exportImageM.setName("exportImageM"); // NOI18N
+        fileM.add(exportImageM);
+
+        exportMovieM.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/export-movie18.png"))); // NOI18N
+        exportMovieM.setText(resourceMap.getString("exportMovieM.text")); // NOI18N
+        exportMovieM.setEnabled(false);
+        exportMovieM.setName("exportMovieM"); // NOI18N
+
+        export_movMI.setEnabled(false);
+        export_movMI.setName("export_movMI"); // NOI18N
+        exportMovieM.add(export_movMI);
+
+        fileM.add(exportMovieM);
+
+        jSeparator6.setName("jSeparator6"); // NOI18N
+        fileM.add(jSeparator6);
+
+        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance().getContext().getActionMap(GraphExplorerView.class, this);
+        quitMI.setAction(actionMap.get("quit")); // NOI18N
+        quitMI.setName("quitMI"); // NOI18N
+        fileM.add(quitMI);
+
+        menu.add(fileM);
+
+        viewM.setText(resourceMap.getString("viewM.text")); // NOI18N
+        viewM.setName("viewM"); // NOI18N
+
+        fitMI.setAction(actionMap.get("fitToWindow")); // NOI18N
+        fitMI.setName("fitMI"); // NOI18N
+        viewM.add(fitMI);
+
+        fullScreenMI.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_ENTER, java.awt.event.InputEvent.ALT_MASK | java.awt.event.InputEvent.SHIFT_MASK));
+        fullScreenMI.setText(resourceMap.getString("fullScreenMI.text")); // NOI18N
+        fullScreenMI.setName("fullScreenMI"); // NOI18N
+        fullScreenMI.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fullScreenMIActionPerformed(evt);
+            }
+        });
+        viewM.add(fullScreenMI);
+
+        jSeparator11.setName("jSeparator11"); // NOI18N
+        viewM.add(jSeparator11);
+
+        showEdMI.setAction(actionMap.get("showEditorDialog")); // NOI18N
+        showEdMI.setName("showEdMI"); // NOI18N
+        viewM.add(showEdMI);
+
+        menu.add(viewM);
+
+        layoutM.setText(resourceMap.getString("layoutM.text")); // NOI18N
+        layoutM.setName("layoutM"); // NOI18N
+
+        circularMI.setAction(actionMap.get("layoutCircle")); // NOI18N
+        circularMI.setName("circularMI"); // NOI18N
+        layoutM.add(circularMI);
+
+        randomMI.setAction(actionMap.get("layoutRandom")); // NOI18N
+        randomMI.setName("randomMI"); // NOI18N
+        layoutM.add(randomMI);
+
+        staticSpringMI.setAction(actionMap.get("layoutSpringStatic")); // NOI18N
+        staticSpringMI.setName("staticSpringMI"); // NOI18N
+        layoutM.add(staticSpringMI);
+
+        jSeparator4.setName("jSeparator4"); // NOI18N
+        layoutM.add(jSeparator4);
+
+        energyM.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/layout-spring18.png"))); // NOI18N
+        energyM.setText(resourceMap.getString("energyM.text")); // NOI18N
+        energyM.setName("energyM"); // NOI18N
+
+        energyStartMI.setAction(actions_layout.LAYOUT_ENERGY_START);
+        energyStartMI.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/play18.png"))); // NOI18N
+        energyStartMI.setName("energyStartMI"); // NOI18N
+        energyM.add(energyStartMI);
+
+        timeStartMI.setAction(actions_layout.LAYOUT_TIME_START);
+        timeStartMI.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/play18.png"))); // NOI18N
+        timeStartMI.setName("timeStartMI"); // NOI18N
+        energyM.add(timeStartMI);
+
+        layoutM.add(energyM);
+
+        energyIterateMI.setAction(actions_layout.LAYOUT_ITERATE);
+        energyIterateMI.setName("energyIterateMI"); // NOI18N
+        layoutM.add(energyIterateMI);
+
+        energyStopMI.setAction(actions_layout.LAYOUT_STOP);
+        energyStopMI.setName("energyStopMI"); // NOI18N
+        layoutM.add(energyStopMI);
+
+        menu.add(layoutM);
+
+        metricM.setText(resourceMap.getString("metricM.text")); // NOI18N
+        metricM.setName("metricM"); // NOI18N
+
+        localMetricM.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/metric-node18.png"))); // NOI18N
+        localMetricM.setText(resourceMap.getString("localMetricM.text")); // NOI18N
+        localMetricM.setName("localMetricM"); // NOI18N
+        metricM.add(localMetricM);
+
+        globalMetricM.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/metric-graph18.png"))); // NOI18N
+        globalMetricM.setText(resourceMap.getString("globalMetricM.text")); // NOI18N
+        globalMetricM.setName("globalMetricM"); // NOI18N
+        metricM.add(globalMetricM);
+
+        jMenuItem1.setAction(actions_stat.GLOBAL_STATS);
+        jMenuItem1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/metric-graph18.png"))); // NOI18N
+        jMenuItem1.setName("jMenuItem1"); // NOI18N
+        metricM.add(jMenuItem1);
+
+        menu.add(metricM);
+
+        specialM.setText(resourceMap.getString("specialM.text")); // NOI18N
+        specialM.setName("specialM"); // NOI18N
+
+        highlightB.setAction(actionMap.get("highlightSubset")); // NOI18N
+        highlightB.setName("highlightB"); // NOI18N
+        specialM.add(highlightB);
+
+        distinctB.setAction(actionMap.get("distinctColors")); // NOI18N
+        distinctB.setName("distinctB"); // NOI18N
+        specialM.add(distinctB);
+
+        cooperationMI.setAction(actions_stat.COOPERATION);
+        cooperationMI.setName("cooperationMI"); // NOI18N
+        specialM.add(cooperationMI);
+
+        primeMI.setAction(actions_gen.GENERATE_PRIME);
+        primeMI.setName("primeMI"); // NOI18N
+        specialM.add(primeMI);
+
+        menu.add(specialM);
+
+        helpM.setText(resourceMap.getString("helpM.text")); // NOI18N
+        helpM.setName("helpM"); // NOI18N
+
+        aboutMI.setAction(actionMap.get("showAbout")); // NOI18N
+        aboutMI.setName("aboutMI"); // NOI18N
+        helpM.add(aboutMI);
+
+        contentMI.setAction(actionMap.get("showHelp")); // NOI18N
+        contentMI.setName("contentMI"); // NOI18N
+        helpM.add(contentMI);
+
+        menu.add(helpM);
+
+        newPM.setName("newPM"); // NOI18N
 
         emptyMI1.setAction(actions_gen.GENERATE_EMPTY);
+        emptyMI1.setName("emptyMI1"); // NOI18N
         newPM.add(emptyMI1);
 
         circleMI1.setAction(actions_gen.GENERATE_CIRCLE);
+        circleMI1.setName("circleMI1"); // NOI18N
         newPM.add(circleMI1);
 
         starMI1.setAction(actions_gen.GENERATE_STAR);
+        starMI1.setName("starMI1"); // NOI18N
         newPM.add(starMI1);
 
         wheelMI1.setAction(actions_gen.GENERATE_WHEEL);
+        wheelMI1.setName("wheelMI1"); // NOI18N
         newPM.add(wheelMI1);
 
         completeMI1.setAction(actions_gen.GENERATE_COMPLETE);
+        completeMI1.setName("completeMI1"); // NOI18N
         newPM.add(completeMI1);
+
+        jSeparator5.setName("jSeparator5"); // NOI18N
         newPM.add(jSeparator5);
 
         uniform1MI1.setAction(actions_gen.GENERATE_RANDOM);
-        uniform1MI1.setText("Uniform (Erdos-Renyi) random graph...");
+        uniform1MI1.setText(resourceMap.getString("uniform1MI1.text")); // NOI18N
+        uniform1MI1.setName("uniform1MI1"); // NOI18N
         newPM.add(uniform1MI1);
 
         sequenceMI1.setAction(actions_gen.GENERATE_SEQUENCE);
-        sequenceMI1.setText("Degree sequence random graph...");
+        sequenceMI1.setText(resourceMap.getString("sequenceMI1.text")); // NOI18N
+        sequenceMI1.setName("sequenceMI1"); // NOI18N
         newPM.add(sequenceMI1);
 
         wattsMI1.setAction(actions_gen.GENERATE_WS);
-        wattsMI1.setText("Watts-Strogatz random graph...");
+        wattsMI1.setText(resourceMap.getString("wattsMI1.text")); // NOI18N
+        wattsMI1.setName("wattsMI1"); // NOI18N
         newPM.add(wattsMI1);
 
         preferentialMI1.setAction(actions_gen.GENERATE_PREFERENTIAL);
-        preferentialMI1.setText("Preferential Attachment...");
+        preferentialMI1.setText(resourceMap.getString("preferentialMI1.text")); // NOI18N
+        preferentialMI1.setName("preferentialMI1"); // NOI18N
         newPM.add(preferentialMI1);
 
         proximityMI1.setAction(actions_gen.GENERATE_PROXIMITY);
+        proximityMI1.setName("proximityMI1"); // NOI18N
         newPM.add(proximityMI1);
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Graph Explorer");
+        labelPS.setName("labelPS"); // NOI18N
+
+        edgePS.setName("edgePS"); // NOI18N
+
+        nodePS.setName("nodePS"); // NOI18N
+
+        layoutPS.setName("layoutPS"); // NOI18N
 
         toolbar.setRollover(true);
+        toolbar.setName("toolbar"); // NOI18N
 
         newTBB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/new-graph24.png"))); // NOI18N
-        newTBB.setComponentPopupMenu(newPM);
         newTBB.setFocusable(false);
+        newTBB.setName("newTBB"); // NOI18N
         newTBB.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 newTBBActionPerformed(evt);
@@ -573,347 +981,112 @@ public class GraphExplorerMain extends javax.swing.JFrame
         loadTBB.setAction(actions_io.LOAD_ACTION);
         loadTBB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/load-graph24.png"))); // NOI18N
         loadTBB.setFocusable(false);
+        loadTBB.setName("loadTBB"); // NOI18N
         toolbar.add(loadTBB);
 
         saveTBB.setAction(actions_io.SAVE_ACTION);
         saveTBB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/save-graph24.png"))); // NOI18N
         saveTBB.setFocusable(false);
+        saveTBB.setName("saveTBB"); // NOI18N
         toolbar.add(saveTBB);
+
+        jSeparator2.setName("jSeparator2"); // NOI18N
         toolbar.add(jSeparator2);
 
-        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance().getContext().getActionMap(GraphExplorerMain.class, this);
         jButton1.setAction(actionMap.get("fitToWindow")); // NOI18N
         jButton1.setFocusable(false);
         jButton1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButton1.setName("jButton1"); // NOI18N
         jButton1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolbar.add(jButton1);
+
+        jSeparator10.setName("jSeparator10"); // NOI18N
         toolbar.add(jSeparator10);
 
         layoutCircleTBB.setAction(actionMap.get("layoutCircle")); // NOI18N
         layoutCircleTBB.setFocusable(false);
+        layoutCircleTBB.setName("layoutCircleTBB"); // NOI18N
         toolbar.add(layoutCircleTBB);
 
         layoutRandomTBB.setAction(actionMap.get("layoutRandom")); // NOI18N
         layoutRandomTBB.setFocusable(false);
+        layoutRandomTBB.setName("layoutRandomTBB"); // NOI18N
         toolbar.add(layoutRandomTBB);
 
         layoutStaticTBB.setAction(actionMap.get("layoutSpringStatic")); // NOI18N
         layoutStaticTBB.setFocusable(false);
         layoutStaticTBB.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        layoutStaticTBB.setName("layoutStaticTBB"); // NOI18N
         layoutStaticTBB.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolbar.add(layoutStaticTBB);
 
         layoutEnergyTBB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/play24.png"))); // NOI18N
-        layoutEnergyTBB.setToolTipText("Start/stop animation of the spring layout algorithm for currently displayed graph.");
+        layoutEnergyTBB.setToolTipText(resourceMap.getString("layoutEnergyTBB.toolTipText")); // NOI18N
         layoutEnergyTBB.setFocusable(false);
+        layoutEnergyTBB.setName("layoutEnergyTBB"); // NOI18N
         layoutEnergyTBB.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 layoutEnergyTBBActionPerformed(evt);
             }
         });
         toolbar.add(layoutEnergyTBB);
+
+        jSeparator3.setName("jSeparator3"); // NOI18N
         toolbar.add(jSeparator3);
 
+        jPanel1.setName("jPanel1"); // NOI18N
         jPanel1.setLayout(new javax.swing.BoxLayout(jPanel1, javax.swing.BoxLayout.X_AXIS));
         toolbar.add(jPanel1);
+
+        metricBar1.setName("metricBar1"); // NOI18N
         toolbar.add(metricBar1);
+
+        jSeparator9.setName("jSeparator9"); // NOI18N
         toolbar.add(jSeparator9);
+
+        filterBar.setName("filterBar"); // NOI18N
         toolbar.add(filterBar);
 
+        jPanel2.setName("jPanel2"); // NOI18N
         jPanel2.setLayout(new javax.swing.BoxLayout(jPanel2, javax.swing.BoxLayout.LINE_AXIS));
         toolbar.add(jPanel2);
+
+        jSeparator8.setName("jSeparator8"); // NOI18N
         toolbar.add(jSeparator8);
 
-        getContentPane().add(toolbar, java.awt.BorderLayout.NORTH);
-
-        statusB.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
-
-        statusL.setFont(new java.awt.Font("Tahoma", 0, 12));
-        statusL.setText("Status: ...");
-        statusL.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
-
-        org.jdesktop.layout.GroupLayout statusBLayout = new org.jdesktop.layout.GroupLayout(statusB);
-        statusB.setLayout(statusBLayout);
-        statusBLayout.setHorizontalGroup(
-            statusBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(statusL, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 1111, Short.MAX_VALUE)
-        );
-        statusBLayout.setVerticalGroup(
-            statusBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(statusL)
-        );
-
-        getContentPane().add(statusB, java.awt.BorderLayout.PAGE_END);
-
-        mainSP2.setDividerSize(8);
-        mainSP2.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
-        mainSP2.setResizeWeight(0.8);
-        mainSP2.setOneTouchExpandable(true);
-
-        mainSP.setDividerSize(8);
-        mainSP.setOneTouchExpandable(true);
-
-        graphTP.setPreferredSize(new java.awt.Dimension(800, 600));
-        graphTP.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                graphTPStateChanged(evt);
-            }
-        });
-        mainSP.setRightComponent(graphTP);
-
-        propertySP.setPreferredSize(new java.awt.Dimension(200, 400));
-        propertySP.setViewportView(propertyRP);
-
-        mainSP.setLeftComponent(propertySP);
-
-        mainSP2.setTopComponent(mainSP);
-
-        boxPanel.setPreferredSize(new java.awt.Dimension(800, 250));
-        boxPanel.setLayout(new javax.swing.BoxLayout(boxPanel, javax.swing.BoxLayout.LINE_AXIS));
-
-        boxP1.setLayout(new java.awt.BorderLayout());
-
-        mainTableTB.setFloatable(false);
-        mainTableTB.setRollover(true);
-        mainTableTB.add(metricBar2);
-
-        boxP1.add(mainTableTB, java.awt.BorderLayout.PAGE_START);
-
-        mainTableSP.setViewportView(mainTable);
-
-        boxP1.add(mainTableSP, java.awt.BorderLayout.CENTER);
-
-        boxPanel.add(boxP1);
-
-        boxP2.setLayout(new java.awt.BorderLayout());
-
-        boxTP2.setTabLayoutPolicy(javax.swing.JTabbedPane.SCROLL_TAB_LAYOUT);
-        boxTP2.addTab("Metric Plot", metricPlot1);
-
-        distributionTable.setModel(metricPlot1.getTableModel());
-        distributionTableSP.setViewportView(distributionTable);
-
-        boxTP2.addTab("Metric Table", distributionTableSP);
-
-        boxP2.add(boxTP2, java.awt.BorderLayout.CENTER);
-
-        boxPanel.add(boxP2);
-
-        boxP3.setLayout(new java.awt.BorderLayout());
-
-        outputSP.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-
-        outputTP.setBackground(new java.awt.Color(0, 0, 0));
-        outputTP.setForeground(new java.awt.Color(204, 204, 255));
-        outputTP.setText("== Output ==\n");
-        outputTP.setPreferredSize(new java.awt.Dimension(500, 200));
-        outputSP.setViewportView(outputTP);
-
-        boxP3.add(outputSP, java.awt.BorderLayout.CENTER);
-
-        boxPanel.add(boxP3);
-
-        mainSP2.setBottomComponent(boxPanel);
-
-        getContentPane().add(mainSP2, java.awt.BorderLayout.CENTER);
-
-        fileM.setText("File");
-
-        newM.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/new-graph18.png"))); // NOI18N
-        newM.setText("New Graph");
-
-        emptyMI.setAction(actions_gen.GENERATE_EMPTY);
-        emptyMI.setText("Empty graph...");
-        newM.add(emptyMI);
-
-        circleMI.setAction(actions_gen.GENERATE_CIRCLE);
-        circleMI.setText("Circle graph...");
-        newM.add(circleMI);
-
-        starMI.setAction(actions_gen.GENERATE_STAR);
-        starMI.setText("Star graph...");
-        newM.add(starMI);
-
-        wheelMI.setAction(actions_gen.GENERATE_WHEEL);
-        wheelMI.setText("Wheel graph...");
-        newM.add(wheelMI);
-
-        completeMI.setAction(actions_gen.GENERATE_COMPLETE);
-        completeMI.setText("Complete graph...");
-        newM.add(completeMI);
-        newM.add(jSeparator1);
-
-        uniform1MI.setAction(actions_gen.GENERATE_RANDOM);
-        uniform1MI.setText("Uniform (Erdos-Renyi) random graph...");
-        newM.add(uniform1MI);
-
-        sequenceMI.setAction(actions_gen.GENERATE_SEQUENCE);
-        sequenceMI.setText("Degree sequence random graph...");
-        newM.add(sequenceMI);
-
-        wattsMI.setAction(actions_gen.GENERATE_WS);
-        wattsMI.setText("Watts-Strogatz random graph...");
-        newM.add(wattsMI);
-
-        preferentialMI.setAction(actions_gen.GENERATE_PREFERENTIAL);
-        preferentialMI.setText("Preferential Attachment...");
-        newM.add(preferentialMI);
-
-        proximityMI.setAction(actions_gen.GENERATE_PROXIMITY);
-        newM.add(proximityMI);
-
-        fileM.add(newM);
-
-        loadMI.setAction(actions_io.LOAD_ACTION);
-        loadMI.setText("Load graph from file");
-        fileM.add(loadMI);
-
-        saveMI.setAction(actions_io.SAVE_ACTION);
-        saveMI.setText("Save graph");
-        fileM.add(saveMI);
-
-        saveMI1.setAction(actions_io.SAVE_AS_ACTION);
-        saveMI1.setText("Save graph as ...");
-        fileM.add(saveMI1);
-
-        closeMI.setAction(actions_io.CLOSE_ACTION);
-        closeMI.setText("Close current graph");
-        fileM.add(closeMI);
-        fileM.add(jSeparator7);
-
-        exportImageM.setText("Export image");
-        exportImageM.setEnabled(false);
-        fileM.add(exportImageM);
-
-        exportMovieM.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/export-movie18.png"))); // NOI18N
-        exportMovieM.setText("Export movie");
-        exportMovieM.setEnabled(false);
-
-        export_movMI.setEnabled(false);
-        exportMovieM.add(export_movMI);
-
-        fileM.add(exportMovieM);
-        fileM.add(jSeparator6);
-
-        quitMI.setAction(actionMap.get("quit")); // NOI18N
-        fileM.add(quitMI);
-
-        menu.add(fileM);
-
-        viewM.setText("View");
-
-        fitMI.setAction(actionMap.get("fitToWindow")); // NOI18N
-        viewM.add(fitMI);
-
-        fullScreenMI.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_ENTER, java.awt.event.InputEvent.ALT_MASK | java.awt.event.InputEvent.SHIFT_MASK));
-        fullScreenMI.setText("Full Screen");
-        fullScreenMI.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                fullScreenMIActionPerformed(evt);
-            }
-        });
-        viewM.add(fullScreenMI);
-        viewM.add(jSeparator11);
-
-        showEdMI.setAction(actionMap.get("showEditorDialog")); // NOI18N
-        viewM.add(showEdMI);
-
-        menu.add(viewM);
-
-        layoutM.setText("Layout");
-
-        circularMI.setAction(actionMap.get("layoutCircle")); // NOI18N
-        layoutM.add(circularMI);
-
-        randomMI.setAction(actionMap.get("layoutRandom")); // NOI18N
-        layoutM.add(randomMI);
-
-        staticSpringMI.setAction(actionMap.get("layoutSpringStatic")); // NOI18N
-        layoutM.add(staticSpringMI);
-        layoutM.add(jSeparator4);
-
-        energyM.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/layout-spring18.png"))); // NOI18N
-        energyM.setText("Animating layouts");
-
-        energyStartMI.setAction(actions_layout.LAYOUT_ENERGY_START);
-        energyStartMI.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/play18.png"))); // NOI18N
-        energyM.add(energyStartMI);
-
-        timeStartMI.setAction(actions_layout.LAYOUT_TIME_START);
-        timeStartMI.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/play18.png"))); // NOI18N
-        energyM.add(timeStartMI);
-
-        layoutM.add(energyM);
-
-        energyIterateMI.setAction(actions_layout.LAYOUT_ITERATE);
-        layoutM.add(energyIterateMI);
-
-        energyStopMI.setAction(actions_layout.LAYOUT_STOP);
-        layoutM.add(energyStopMI);
-
-        menu.add(layoutM);
-
-        metricM.setText("Metrics");
-
-        localMetricM.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/metric-node18.png"))); // NOI18N
-        localMetricM.setText("Local");
-        metricM.add(localMetricM);
-
-        globalMetricM.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/metric-graph18.png"))); // NOI18N
-        globalMetricM.setText("Global");
-        metricM.add(globalMetricM);
-
-        jMenuItem1.setAction(actions_stat.GLOBAL_STATS);
-        jMenuItem1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/graphexplorer/resources/metric-graph18.png"))); // NOI18N
-        metricM.add(jMenuItem1);
-
-        menu.add(metricM);
-
-        specialM.setText("Special");
-
-        highlightB.setAction(actionMap.get("highlightSubset")); // NOI18N
-        specialM.add(highlightB);
-
-        distinctB.setAction(actionMap.get("distinctColors")); // NOI18N
-        specialM.add(distinctB);
-
-        cooperationMI.setAction(actions_stat.COOPERATION);
-        specialM.add(cooperationMI);
-
-        primeMI.setAction(actions_gen.GENERATE_PRIME);
-        specialM.add(primeMI);
-
-        menu.add(specialM);
-
-        helpM.setText("Help");
-
-        aboutMI.setAction(actionMap.get("showAbout")); // NOI18N
-        helpM.add(aboutMI);
-
-        contentMI.setAction(actionMap.get("showHelp")); // NOI18N
-        helpM.add(contentMI);
-
-        menu.add(helpM);
-
-        setJMenuBar(menu);
-
-        pack();
+        setComponent(mainPanel);
+        setMenuBar(menu);
+        setStatusBar(statusPanel);
+        setToolBar(toolbar);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void graphTPStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_graphTPStateChanged
-        // update active graph based on selected tab
-        Component active = graphTP.getSelectedComponent();
-        if (active == null)
-            master.setActiveController(null);
-        else
-            for (Entry<GraphController, Component> en : tabs.entrySet())
-                if (en.getValue() == active) {
-                    master.setActiveController(en.getKey());
-                    return;
-                }
-    }//GEN-LAST:event_graphTPStateChanged
+private void fullScreenMIActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fullScreenMIActionPerformed
+        GraphicsDevice dev = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        
+        JFrame frame = getFrame();
+        
+        if (dev.getFullScreenWindow() == frame) {
+            frame.setVisible(false);
+            frame.dispose();
+            frame.setUndecorated(false);
+            frame.setResizable(true);
+            dev.setFullScreenWindow(null);
+            frame.setVisible(true);
+        } else {
+            frame.setVisible(false);
+            frame.dispose();
+            frame.setUndecorated(true);
+            frame.setResizable(false);
+            dev.setFullScreenWindow(frame);
+            frame.setVisible(true);
+        }
+}//GEN-LAST:event_fullScreenMIActionPerformed
 
-    private void layoutEnergyTBBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_layoutEnergyTBBActionPerformed
+private void newTBBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newTBBActionPerformed
+        newPM.show(newTBB, 5, 5);
+}//GEN-LAST:event_newTBBActionPerformed
+
+private void layoutEnergyTBBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_layoutEnergyTBBActionPerformed
         // this button swaps the current status of the layout between playing & paused
         GraphController gc = controller();
         if (gc != null) {
@@ -924,33 +1097,21 @@ public class GraphExplorerMain extends javax.swing.JFrame
         } else {
             layoutEnergyTBB.setSelected(false);
         }
-    }//GEN-LAST:event_layoutEnergyTBBActionPerformed
+}//GEN-LAST:event_layoutEnergyTBBActionPerformed
 
-    private void newTBBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newTBBActionPerformed
-        newPM.show(newTBB, 5, 5);
-    }//GEN-LAST:event_newTBBActionPerformed
+private void graphTPStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_graphTPStateChanged
+        // update active graph based on selected tab
+        Component active = graphTP.getSelectedComponent();
+        if (active == null)
+            master.setActiveController(null);
+        else
+            for (Entry<GraphController, Component> en : tabs.entrySet())
+                if (en.getValue() == active) {
+                    master.setActiveController(en.getKey());
+                    return;
+                }
+}//GEN-LAST:event_graphTPStateChanged
 
-    private void fullScreenMIActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fullScreenMIActionPerformed
-        GraphicsDevice dev = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-        if (dev.getFullScreenWindow() == this) {
-            setVisible(false);
-            dispose();
-            setUndecorated(false);
-            setResizable(true);
-            dev.setFullScreenWindow(null);
-            setVisible(true);
-        } else {
-            setVisible(false);
-            dispose();
-            setUndecorated(true);
-            setResizable(false);
-            dev.setFullScreenWindow(this);
-            setVisible(true);
-        }
-    }//GEN-LAST:event_fullScreenMIActionPerformed
-
-
-    // <editor-fold defaultstate="collapsed" desc="VARIABLE DECLARATIONS">
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutMI;
     private javax.swing.JPanel boxP1;
@@ -1012,6 +1173,7 @@ public class GraphExplorerMain extends javax.swing.JFrame
     private javax.swing.JMenuItem loadMI;
     private javax.swing.JButton loadTBB;
     private javax.swing.JMenu localMetricM;
+    private javax.swing.JPanel mainPanel;
     private javax.swing.JSplitPane mainSP;
     private javax.swing.JSplitPane mainSP2;
     private graphexplorer.views.GraphTable mainTable;
@@ -1032,6 +1194,7 @@ public class GraphExplorerMain extends javax.swing.JFrame
     private javax.swing.JMenuItem preferentialMI;
     private javax.swing.JMenuItem preferentialMI1;
     private javax.swing.JMenuItem primeMI;
+    private javax.swing.JProgressBar progressBar;
     private gui.RollupPanel propertyRP;
     private javax.swing.JScrollPane propertySP;
     private javax.swing.JMenuItem proximityMI;
@@ -1048,8 +1211,9 @@ public class GraphExplorerMain extends javax.swing.JFrame
     private javax.swing.JMenuItem starMI;
     private javax.swing.JMenuItem starMI1;
     private javax.swing.JMenuItem staticSpringMI;
-    private javax.swing.JPanel statusB;
-    private javax.swing.JLabel statusL;
+    private javax.swing.JLabel statusAnimationLabel;
+    private javax.swing.JLabel statusMessageLabel;
+    private javax.swing.JPanel statusPanel;
     private javax.swing.JMenuItem timeStartMI;
     private javax.swing.JToolBar toolbar;
     private javax.swing.JMenuItem uniform1MI;
@@ -1060,18 +1224,23 @@ public class GraphExplorerMain extends javax.swing.JFrame
     private javax.swing.JMenuItem wheelMI;
     private javax.swing.JMenuItem wheelMI1;
     // End of variables declaration//GEN-END:variables
-    // </editor-fold>
 
-    // </editor-fold>
+    private final Timer messageTimer;
+    private final Timer busyIconTimer;
+    private final Icon idleIcon;
+    private final Icon[] busyIcons = new Icon[15];
+    private int busyIconIndex = 0;
 
-
+    private JDialog aboutBox;
+    
+    
     // <editor-fold defaultstate="collapsed" desc="GraphExplorerInterface METHODS">
     //
     // GraphExplorerInterface METHODS
     //
     
     public Component dialogComponent() {
-        return this;
+        return getFrame();
     }
 
     public void output(String output) {
@@ -1079,7 +1248,7 @@ public class GraphExplorerMain extends javax.swing.JFrame
         try {
             d.insertString(d.getLength(), output + "\n\n", null);
         } catch (BadLocationException ex) {
-            Logger.getLogger(GraphExplorerMain.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(GraphExplorerView.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -1143,7 +1312,15 @@ public class GraphExplorerMain extends javax.swing.JFrame
                 PlaneGraphAdapter adapter = ac.getComponent().getAdapter();
                 propertyRP.add(nodePS = new PropertySheet(adapter.getNodeRenderer()), "Nodes");
                 propertyRP.add(edgePS = new PropertySheet(adapter.getEdgeRenderer()), "Edges");
-                propertyRP.add(labelPS = new PropertySheet(adapter.getNodeLabelRenderer()), "Labels");
+                StringRenderer lRend = adapter.getNodeLabelRenderer();
+                if (lRend instanceof BasicStringRenderer) {
+                    LabelBean lBean = new LabelBean((BasicStringRenderer)lRend);
+                    int size = ac.getBaseGraph().order();
+                    if (size > 100)
+                        lBean.setVisible(false);
+                    propertyRP.add(labelPS = new PropertySheet(lBean), "Labels");
+                } else 
+                    propertyRP.add(labelPS = new PropertySheet(lRend), "Labels");
                 nodePS.addBeanChangeListener(this);
                 edgePS.addBeanChangeListener(this);
                 labelPS.addBeanChangeListener(this);
@@ -1205,6 +1382,20 @@ public class GraphExplorerMain extends javax.swing.JFrame
                 temp.add(gc);
         for (GraphController gc : temp) {
             Component c = null;
+            
+            int size = gc.getBaseGraph().order();
+            if (size > 5000)
+                JOptionPane.showMessageDialog(getFrame(), 
+                        "<html>The graph loading has " + size + " vertices.<br>"
+                        + "GraphExplorer may operate very slowly graphs with more than 5000 vertices.<br>"
+                        + "Resizing the display so the displayed graph is smaller may help.",
+                        "WARNING", JOptionPane.WARNING_MESSAGE);
+            else if (size > 2000)
+                JOptionPane.showMessageDialog(getFrame(), 
+                        "<html>The graph loading has " + size + " vertices.<br>"
+                        + "GraphExplorer may operate slowly for graphs with more than 2000 vertices.<br>"
+                        + "Resizing the display so the displayed graph is smaller may help.",
+                        "WARNING", JOptionPane.WARNING_MESSAGE);
 
             if (gc instanceof TimeGraphController) {
                 TimeGraphController tContr = (TimeGraphController) gc;
@@ -1269,7 +1460,7 @@ public class GraphExplorerMain extends javax.swing.JFrame
         if (prop.equals(GraphController.$OUTPUT))
             output((String) evt.getNewValue());
         else if (prop.equals(GraphController.$STATUS))
-            statusL.setText((String) evt.getNewValue());
+            statusMessageLabel.setText((String) evt.getNewValue());
         else if (evt.getSource() == master) {
             if (prop.equals(GraphControllerMaster.$ACTIVE))
                 updateActiveGraph();
@@ -1317,6 +1508,46 @@ public class GraphExplorerMain extends javax.swing.JFrame
         public Color getColor() { return graphPlot() == null ? Color.WHITE : graphPlot().getBackground(); }
         public void setColor(Color col) { if (graphPlot() != null) graphPlot().setBackground(col); }
     }
+    
+    /** Wraps label bean to allow visibility checks */
+    public class LabelBean {
+        private int alpha;
+        private final BasicStringRenderer rend;
+        public LabelBean(BasicStringRenderer rend) { 
+            assert rend != null;
+            this.rend = rend; 
+            alpha = rend.getColor().getAlpha(); 
+        }
+        
+        public boolean isVisible() { 
+            return rend.getColor().getAlpha() > 0; 
+        }
+        public void setVisible(boolean val) {
+            Color c = rend.getColor();
+            if (val && c.getAlpha() == 0) {
+                if (alpha == 0)
+                    alpha = 255;
+                setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), alpha));
+            } else if (!val) {
+                if (c.getAlpha() > 0)
+                    this.alpha = c.getAlpha();
+                setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), 0));
+            }
+        }
+
+        public Point getOffset() { return rend.getOffset(); }
+        public void setOffset(Point off) { rend.setOffset(off); }
+        
+        public Font getFont() { return rend.getFont(); }
+        public void setFont(Font font) { rend.setFont(font); }
+        
+        public Color getColor() { return rend.getColor(); }
+        public void setColor(Color color) { rend.setColor(color); }
+        
+        public Anchor getAnchor() { return rend.getAnchor(); }
+        public void setAnchor(Anchor newValue) { rend.setAnchor(newValue); }
+    }
+    
     // </editor-fold>
 
 }

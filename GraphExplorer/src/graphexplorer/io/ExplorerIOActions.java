@@ -5,7 +5,7 @@
 
 package graphexplorer.io;
 
-import graphexplorer.GraphExplorerMain;
+import graphexplorer.GraphExplorerView;
 import graphexplorer.io.GraphFileChooser.ChooserFilter;
 import graphexplorer.controller.GraphController;
 import graphexplorer.controller.GraphControllerMaster;
@@ -89,7 +89,7 @@ public class ExplorerIOActions {
     public Action SAVE_AS_ACTION = new SaveAction(-1);
 
     /** Closes the current active graph */
-    public Action CLOSE_ACTION = new AbstractAction("Close graph", GraphExplorerMain.loadIcon("close18")) {
+    public Action CLOSE_ACTION = new AbstractAction("Close graph", GraphExplorerView.loadIcon("close18")) {
         {
             putValue(SHORT_DESCRIPTION, "Closes current graph window");
             putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_MASK));
@@ -104,7 +104,7 @@ public class ExplorerIOActions {
     /** Action to load a graph */
     class LoadAction extends AbstractAction {
         LoadAction(int accelerator) {
-            super("Load graph", GraphExplorerMain.loadIcon("load-graph18"));
+            super("Load graph", GraphExplorerView.loadIcon("load-graph18"));
             if (accelerator != -1) {
                 putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(accelerator, InputEvent.CTRL_MASK));
                 putValue(MNEMONIC_KEY, accelerator);
@@ -178,7 +178,7 @@ public class ExplorerIOActions {
     /** Action to save the current graph, or to save graph under a new name */
     class SaveAction extends AbstractAction {
         SaveAction(int accelerator) {
-            super("Save graph", GraphExplorerMain.loadIcon("save-graph18"));
+            super("Save graph", GraphExplorerView.loadIcon("save-graph18"));
             if (accelerator != -1) {
                 putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(accelerator, InputEvent.CTRL_MASK));
                 putValue(MNEMONIC_KEY, accelerator);
@@ -307,7 +307,7 @@ public class ExplorerIOActions {
 
         /** Construct a new movie action */
         public MovieAction(GraphController gc, TimeGraphComponent lgp) {
-            super("Quicktime movie (.mov)", GraphExplorerMain.loadIcon("export-movie18"));
+            super("Quicktime movie (.mov)", GraphExplorerView.loadIcon("export-movie18"));
             this.gc = gc;
             this.tgm = lgp;
             filter = new FileNameExtensionFilter("Quicktime movie (.mov)", "mov");
