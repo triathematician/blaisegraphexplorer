@@ -3,4 +3,9 @@
 
   * [GettingStarted Getting Started]
   * [GraphFileFormats File Formats]
+   * [EdgeListFormat EdgeList]
+   * [PajekFormat Pajek]
+   * [UCINetFormat UCINet]
+   * [GraphMLFormat GraphML]
+   * [DyNetMLFormat DyNetML]
   * [DynamicGraphs Working with Dynamic Graphs]
