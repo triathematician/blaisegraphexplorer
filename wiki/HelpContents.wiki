@@ -1,7 +1,7 @@
 #summary Help Contents
 #sidebar HelpContents
 
-  * [GettingStarted Getting Started]
+  * [GraphExplorer Getting Started]
   * [GraphFileFormats Supported File Formats]
    * [EdgeListFormat Edge List]
    * [PajekFormat Pajek]
