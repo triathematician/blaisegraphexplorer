@@ -1,6 +1,8 @@
 #summary Help Contents
 #sidebar HelpContents
 
+= Help Contents =
+
   * [GraphExplorer Getting Started]
   * [GraphFileFormats Supported File Formats]
    * [EdgeListFormat Edge List]
