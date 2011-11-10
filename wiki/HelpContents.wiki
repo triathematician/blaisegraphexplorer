@@ -1,7 +1,7 @@
 #summary Help Contents
 #sidebar HelpContents
 
-= Help Contents =
+*Help Contents*
 
   * [GraphExplorer Getting Started]
   * [GraphFileFormats Supported File Formats]
