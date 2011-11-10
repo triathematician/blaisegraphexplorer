@@ -1,5 +1,6 @@
 #summary Description of file formats supported in GraphExplorer
 #labels Featured,Documentation
+#sidebar HelpContents
 
 = File Formats in GraphExplorer =
 In the GraphExplorer interface, file formats are determined by the selection of file type in the load/save file dialog. Several different file formats for graphs are supported. Descriptions follow below.
