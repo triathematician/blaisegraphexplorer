@@ -1,4 +1,5 @@
 #summary Working with dynamic graphs in GraphExplorer
+#sidebar HelpContents
 
 = Dynamic Graphs =
 Dynamic graphs are graphs that change over time.
