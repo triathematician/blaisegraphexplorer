@@ -4,10 +4,10 @@
 
 = File Formats in GraphExplorer =
 In the GraphExplorer interface, file formats are determined by the selection of file type in the load/save file dialog. Several different file formats for graphs are supported:
- * EdgeListFormat
- * PajekFormat
- * UCINetFormat
- * GraphMLFormat
- * DyNetMLFormat
+ * [EdgeListFormat Edge List (.txt)]
+ * [PajekFormat Pajek (.net)]
+ * [UCINetFormat UCINet (.dat)]
+ * [GraphMLFormat GraphML (.xml, .graphml)]
+ * [DyNetMLFormat DyNetML (.xml, .dynetml)]
 
 _NOTE:_ "edge" denotes an undirected edge in a graph, while "arc" denotes a directed edge.
