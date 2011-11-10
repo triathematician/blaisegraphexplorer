@@ -2,8 +2,8 @@
 #sidebar HelpContents
 
   * [GettingStarted Getting Started]
-  * [GraphFileFormats File Formats]
-   * [EdgeListFormat EdgeList]
+  * [GraphFileFormats Supported File Formats]
+   * [EdgeListFormat Edge List]
    * [PajekFormat Pajek]
    * [UCINetFormat UCINet]
    * [GraphMLFormat GraphML]
