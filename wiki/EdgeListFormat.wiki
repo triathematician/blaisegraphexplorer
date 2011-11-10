@@ -1,4 +1,5 @@
 #summary Support for edge list graph file format.
+#sidebar HelpContents
 
 See also GraphFileFormats.
 
