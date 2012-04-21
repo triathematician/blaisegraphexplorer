@@ -23,7 +23,7 @@ import org.bm.blaise.scio.graph.WeightedGraph;
 import org.bm.blaise.scio.graph.io.PajekGraphIO.ImportMode;
 import org.bm.blaise.scio.graph.time.ListTimeGraph;
 import org.bm.blaise.scio.graph.time.TimeGraph;
-import util.io.FileNameExtensionFilter;
+import org.bm.util.io.FileNameExtensionFilter;
 
 /**
  * <p>

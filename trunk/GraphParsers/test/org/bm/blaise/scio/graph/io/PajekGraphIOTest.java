@@ -35,47 +35,47 @@ public class PajekGraphIOTest {
 
     public static Graph<Integer> sampleAirport() {
         if (SAMPLE_AIRPORT == null) SAMPLE_AIRPORT = (Graph<Integer>) PajekGraphIO.getInstance().importGraph(new HashMap<Integer,double[]>(),
-                PajekGraphIO.class.getResource("data/USAirport500.net"), GraphType.REGULAR);
+                PajekGraphIO.class.getResource("resources/USAirport500.net"), GraphType.REGULAR);
         return SAMPLE_AIRPORT; }
     public static Graph<Integer> sampleErdos991() {
         if (SAMPLE_ERDOS991 == null) SAMPLE_ERDOS991 = (Graph<Integer>) PajekGraphIO.getInstance().importGraph(new HashMap<Integer,double[]>(),
-                PajekGraphIO.class.getResource("data/ERDOS991.net"), GraphType.REGULAR);
+                PajekGraphIO.class.getResource("resources/ERDOS991.net"), GraphType.REGULAR);
         return SAMPLE_ERDOS991; }
     public static Graph<Integer> sampleErdos992() {
         if (SAMPLE_ERDOS992 == null) SAMPLE_ERDOS992 = (Graph<Integer>) PajekGraphIO.getInstance().importGraph(new HashMap<Integer,double[]>(),
-                PajekGraphIO.class.getResource("data/ERDOS992.net"), GraphType.REGULAR);
+                PajekGraphIO.class.getResource("resources/ERDOS992.net"), GraphType.REGULAR);
         return SAMPLE_ERDOS992; }
     public static Graph<Integer> sampleFrat() {
         if (SAMPLE_FRAT == null) SAMPLE_FRAT = (Graph<Integer>) PajekGraphIO.getInstance().importGraph(new HashMap<Integer,double[]>(),
-                PajekGraphIO.class.getResource("data/newfrat.net"), GraphType.REGULAR);
+                PajekGraphIO.class.getResource("resources/newfrat.net"), GraphType.REGULAR);
         return SAMPLE_FRAT; }
     public static Graph<Integer> sampleInternet() {
         if (SAMPLE_INTERNET == null) SAMPLE_INTERNET = (Graph<Integer>) PajekGraphIO.getInstance().importGraph(new HashMap<Integer,double[]>(),
-                PajekGraphIO.class.getResource("data/InternetISP.net"), GraphType.REGULAR);
+                PajekGraphIO.class.getResource("resources/InternetISP.net"), GraphType.REGULAR);
         return SAMPLE_INTERNET; }
     public static Graph<Integer> samplePadgett1() {
         if (SAMPLE_PADGETT1 == null) SAMPLE_PADGETT1 = (Graph<Integer>) PajekGraphIO.getInstance().importGraph(new HashMap<Integer,double[]>(),
-                PajekGraphIO.class.getResource("data/padgett.net"), GraphType.REGULAR);
+                PajekGraphIO.class.getResource("resources/padgett.net"), GraphType.REGULAR);
         return SAMPLE_PADGETT1; }
 //    public static Graph<Integer> samplePadgett2() {
 //        if (SAMPLE_PADGETT2 == null) SAMPLE_PADGETT2 = PajekGraphIO.importGraph(PajekGraphIO.class.getResource("data/padgett2.net"));
 //        return SAMPLE_PADGETT2; }
     public static Graph<Integer> sampleS50D01() {
         if (SAMPLE_S50_D01 == null) SAMPLE_S50_D01 = (Graph<Integer>) PajekGraphIO.getInstance().importGraph(new HashMap<Integer,double[]>(),
-                PajekGraphIO.class.getResource("data/s50_d01.net"), GraphType.REGULAR);
+                PajekGraphIO.class.getResource("resources/s50_d01.net"), GraphType.REGULAR);
         return SAMPLE_S50_D01; }
     public static Graph<Integer> sampleTinamatr() {
         if (SAMPLE_TINAMATR == null) SAMPLE_TINAMATR = (Graph<Integer>) PajekGraphIO.getInstance().importGraph(new HashMap<Integer,double[]>(),
-                PajekGraphIO.class.getResource("data/tinamatr.net"), GraphType.REGULAR);
+                PajekGraphIO.class.getResource("resources/tinamatr.net"), GraphType.REGULAR);
         return SAMPLE_TINAMATR; }
 
     public static Graph<Integer> sampleXPadgett() {
         if (X_PADGETT == null) X_PADGETT = (Graph<Integer>) PajekGraphIO.getExtendedInstance().importGraph(new HashMap<Integer,double[]>(),
-                PajekGraphIO.class.getResource("data/padgett.netx"), GraphType.REGULAR);
+                PajekGraphIO.class.getResource("resources/padgett.netx"), GraphType.REGULAR);
         return X_PADGETT; }
     public static Graph<Integer> sampleXAirport() {
         if (X_AIRPORTS == null) X_AIRPORTS = (Graph<Integer>) PajekGraphIO.getExtendedInstance().importGraph(new HashMap<Integer,double[]>(),
-                PajekGraphIO.class.getResource("data/USAirport500.netx"), GraphType.REGULAR);
+                PajekGraphIO.class.getResource("resources/USAirport500.netx"), GraphType.REGULAR);
         return X_AIRPORTS; }
 
     @Test
@@ -89,28 +89,28 @@ public class PajekGraphIOTest {
         Graph<Integer> graph;
 
         graph = sampleAirport();
-          assertEquals(500, graph.order()); assertEquals(2980, graph.edgeNumber()); assertFalse(graph.isDirected());
+          assertEquals(500, graph.order()); assertEquals(2980, graph.edgeCount()); assertFalse(graph.isDirected());
         graph = sampleErdos991();
-          assertEquals(492, graph.order()); assertEquals(1417, graph.edgeNumber()); assertFalse(graph.isDirected());
+          assertEquals(492, graph.order()); assertEquals(1417, graph.edgeCount()); assertFalse(graph.isDirected());
         graph = sampleErdos992();
-          assertEquals(6100, graph.order()); assertEquals(9939, graph.edgeNumber()); assertFalse(graph.isDirected());
+          assertEquals(6100, graph.order()); assertEquals(9939, graph.edgeCount()); assertFalse(graph.isDirected());
         graph = sampleFrat();
           System.out.println("importGraph frat: MANUALLY CHECK FOR DESIRED OUTPUT: " + graph);
-          assertEquals(17, graph.order()); assertEquals(26, graph.edgeNumber()); assertFalse(graph.isDirected());
+          assertEquals(17, graph.order()); assertEquals(26, graph.edgeCount()); assertFalse(graph.isDirected());
         graph = sampleInternet();
-          assertEquals(11174, graph.order()); assertEquals(23409, graph.edgeNumber()); assertFalse(graph.isDirected());
+          assertEquals(11174, graph.order()); assertEquals(23409, graph.edgeCount()); assertFalse(graph.isDirected());
         graph = samplePadgett1();
           System.out.println("importGraph padgett: MANUALLY CHECK FOR DESIRED OUTPUT: " + graph);
-          assertEquals(16, graph.order()); assertEquals(20, graph.edgeNumber()); assertFalse(graph.isDirected());
+          assertEquals(16, graph.order()); assertEquals(20, graph.edgeCount()); assertFalse(graph.isDirected());
           // graph = samplePadgett2();
-          //   assertEquals(17, graph.order()); assertEquals(25, graph.edgeNumber()); assertFalse(graph.isDirected());
+          //   assertEquals(17, graph.order()); assertEquals(25, graph.edgeCount()); assertFalse(graph.isDirected());
           //   System.out.println("importGraph padgett2: MANUALLY CHECK FOR DESIRED OUTPUT: " + graph);
         graph = sampleS50D01();
           System.out.println("importGraph s50_d01: MANUALLY CHECK FOR DESIRED OUTPUT: " + graph);
-          assertEquals(47, graph.order()); assertEquals(113, graph.edgeNumber()); assertTrue(graph.isDirected());
+          assertEquals(47, graph.order()); assertEquals(113, graph.edgeCount()); assertTrue(graph.isDirected());
         graph = sampleTinamatr();
           System.out.println("importGraph tinamatr: MANUALLY CHECK FOR DESIRED OUTPUT: " + graph);
-          assertEquals(11, graph.order()); assertEquals(41, graph.edgeNumber()); assertTrue(graph.isDirected());
+          assertEquals(11, graph.order()); assertEquals(41, graph.edgeCount()); assertTrue(graph.isDirected());
     }
 
     @Test
@@ -119,10 +119,10 @@ public class PajekGraphIOTest {
         Graph<Integer> graph;
 
         graph = sampleXAirport();
-          assertEquals(500, graph.order()); assertEquals(2980, graph.edgeNumber()); assertFalse(graph.isDirected());
+          assertEquals(500, graph.order()); assertEquals(2980, graph.edgeCount()); assertFalse(graph.isDirected());
         graph = sampleXPadgett();
           System.out.println("importGraph padgett: MANUALLY CHECK FOR DESIRED OUTPUT: " + graph);
-          assertEquals(16, graph.order()); assertEquals(20, graph.edgeNumber()); assertFalse(graph.isDirected());
+          assertEquals(16, graph.order()); assertEquals(20, graph.edgeCount()); assertFalse(graph.isDirected());
     }
 
     @Test

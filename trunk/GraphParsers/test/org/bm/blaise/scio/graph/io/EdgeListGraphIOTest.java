@@ -21,7 +21,7 @@ public class EdgeListGraphIOTest {
 
     public static Graph<Integer> sample1() {
         if (SAMPLE1 == null) SAMPLE1 = (Graph<Integer>) EdgeListGraphIO.getInstance().importGraph(new HashMap<Integer,double[]>(),
-                EdgeListGraphIO.class.getResource("data/edgeList.txt"), GraphType.REGULAR);
+                EdgeListGraphIO.class.getResource("resources/edgeList.txt"), GraphType.REGULAR);
         return SAMPLE1; }
 
     @Test
@@ -35,7 +35,7 @@ public class EdgeListGraphIOTest {
         Graph<Integer> g = sample1();
         assertTrue(g.isDirected());
         assertEquals(5, g.order());
-        assertEquals(7, g.edgeNumber());
+        assertEquals(7, g.edgeCount());
     }
 
 }
