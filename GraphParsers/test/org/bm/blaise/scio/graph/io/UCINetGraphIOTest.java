@@ -27,19 +27,19 @@ public class UCINetGraphIOTest {
 
     public static Graph<Integer> sampleFrat() {
         if (SAMPLE_FRAT == null) SAMPLE_FRAT = (Graph<Integer>) io.importGraph(new HashMap<Integer,double[]>(),
-                UCINetGraphIO.class.getResource("data/newfrat.dat"), GraphType.REGULAR);
+                UCINetGraphIO.class.getResource("resources/newfrat.dat"), GraphType.REGULAR);
         return SAMPLE_FRAT; }
     public static Graph<Integer> samplePadgett1() {
         if (SAMPLE_PADGETT == null) SAMPLE_PADGETT = (Graph<Integer>) io.importGraph(new HashMap<Integer,double[]>(),
-                UCINetGraphIO.class.getResource("data/padgett.dat"), GraphType.REGULAR);
+                UCINetGraphIO.class.getResource("resources/padgett.dat"), GraphType.REGULAR);
         return SAMPLE_PADGETT; }
     public static Graph<Integer> samplePadgett2() {
         if (SAMPLE_PADGETT2 == null) SAMPLE_PADGETT2 = (Graph<Integer>) io.importGraph(new HashMap<Integer,double[]>(),
-                UCINetGraphIO.class.getResource("data/padgw.dat"), GraphType.REGULAR);
+                UCINetGraphIO.class.getResource("resources/padgw.dat"), GraphType.REGULAR);
         return SAMPLE_PADGETT2; }
     public static Graph<Integer> sampleTaro() {
         if (SAMPLE_TARO == null) SAMPLE_TARO = (Graph<Integer>) io.importGraph(new HashMap<Integer,double[]>(),
-                UCINetGraphIO.class.getResource("data/taro.dat"), GraphType.REGULAR);
+                UCINetGraphIO.class.getResource("resources/taro.dat"), GraphType.REGULAR);
         return SAMPLE_TARO; }
 
     @Test
@@ -53,13 +53,13 @@ public class UCINetGraphIOTest {
         Graph<Integer> graph;
 
         graph = sampleTaro();
-          assertEquals(22, graph.order()); assertEquals(39, graph.edgeNumber()); assertFalse(graph.isDirected());
-        graph = sampleFrat();
-          assertEquals(17, graph.order());
+          assertEquals(22, graph.order()); assertEquals(39, graph.edgeCount()); assertFalse(graph.isDirected());
         graph = samplePadgett1();
           assertEquals(16, graph.order());
         graph = samplePadgett2();
           assertEquals(16, graph.order());
+        graph = sampleFrat();
+          assertEquals(17, graph.order());
     }
 
     @Test

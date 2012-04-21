@@ -22,7 +22,7 @@ import org.bm.blaise.scio.graph.Graph;
 import org.bm.blaise.scio.graph.ValuedGraph;
 import org.bm.blaise.scio.graph.WeightedGraph;
 import org.bm.blaise.scio.graph.time.TimeGraph;
-import util.io.FileNameExtensionFilter;
+import org.bm.util.io.FileNameExtensionFilter;
 
 /**
  * <p>

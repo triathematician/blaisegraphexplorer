@@ -23,7 +23,7 @@ public class PajekLongGraphIOTest {
         if (SAMPLE_NEWFRAT == null)
             SAMPLE_NEWFRAT = (TimeGraph<Integer>) PajekTimeGraphIO.getInstance().importGraph(
                 new HashMap<Integer,double[]>(),
-                PajekTimeGraphIO.class.getResource("data/newfrat.netx"), GraphType.DYNAMIC);
+                PajekTimeGraphIO.class.getResource("resources/newfrat.netx"), GraphType.DYNAMIC);
         return SAMPLE_NEWFRAT;
     }
 

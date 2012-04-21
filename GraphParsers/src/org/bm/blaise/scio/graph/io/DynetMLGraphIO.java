@@ -24,8 +24,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import util.io.FileNameExtensionFilter;
-import util.io.XMLUtils;
+import org.bm.util.io.FileNameExtensionFilter;
+import org.bm.util.io.XMLUtils;
 
 /**
  * Basic support for the <i>DyNetML</i> XML file structure.

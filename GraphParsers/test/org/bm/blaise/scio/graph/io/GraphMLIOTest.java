@@ -21,7 +21,7 @@ public class GraphMLIOTest {
 
     public static Graph<Integer> sample1() {
         if (SAMPLE1 == null) SAMPLE1 = (Graph<Integer>) GraphMLIO.getInstance().importGraph(new HashMap<Integer,double[]>(),
-                GraphMLIO.class.getResource("data/simple.graphml"), GraphType.REGULAR);
+                GraphMLIO.class.getResource("resources/simple.graphml"), GraphType.REGULAR);
         return SAMPLE1; }
 
     @Test
@@ -35,7 +35,7 @@ public class GraphMLIOTest {
         Graph<Integer> g = sample1();
         assertTrue(g.isDirected());
         assertEquals(11, g.order());
-        assertEquals(12, g.edgeNumber());
+        assertEquals(12, g.edgeCount());
         System.out.println(g);
     }
 

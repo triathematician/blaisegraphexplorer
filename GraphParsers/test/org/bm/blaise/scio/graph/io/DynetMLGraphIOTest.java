@@ -26,7 +26,7 @@ public class DynetMLGraphIOTest {
 
     public static Graph<Integer> sample() {
         if (SAMPLE == null) SAMPLE = (Graph<Integer>) io.importGraph(new HashMap<Integer,double[]>(),
-                DynetMLGraphIO.class.getResource("data/sample.dynetml"), GraphType.REGULAR);
+                DynetMLGraphIO.class.getResource("resources/sample.dynetml"), GraphType.REGULAR);
         return SAMPLE; }
 
     @Test
@@ -43,7 +43,7 @@ public class DynetMLGraphIOTest {
         System.out.println(graph);
         assertTrue(graph.isDirected());
         assertEquals(20, graph.order());
-        assertEquals(38, graph.edgeNumber());
+        assertEquals(38, graph.edgeCount());
         assertTrue(graph.adjacent(0,12));
         assertFalse(graph.adjacent(0,5));
         assertTrue(graph.adjacent(8,9));
